@@ -2,7 +2,7 @@
 
 # --- Configuration ---
 # Robocode Version to download if not found
-ROBOCODE_VERSION = 1.9.3.6
+ROBOCODE_VERSION = 1.10.0
 ROBOCODE_BINARY_ZIP = robocode-$(ROBOCODE_VERSION)-binary.zip
 ROBOCODE_URL = https://downloads.sourceforge.net/project/robocode/robocode-stable/$(ROBOCODE_VERSION)/$(ROBOCODE_BINARY_ZIP)
 
