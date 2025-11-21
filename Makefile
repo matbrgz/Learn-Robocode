@@ -23,6 +23,9 @@ NUM_BENCHMARK_ROBOTS = 10
 # Name of the battle file to generate
 BATTLE_FILE = benchmark.battle
 
+# Name of the results file
+RESULTS_FILE = benchmark_results.txt
+
 # --- Targets ---
 
 .PHONY: all build install battle clean help
@@ -67,12 +70,22 @@ battle: install
 		echo "robot.$${i}=$(MAIN_ROBOT) $(MAIN_ROBOT)$${i}" >> $(BATTLE_FILE); \
 	done
 	@echo "Generated $(BATTLE_FILE) with $(NUM_BENCHMARK_ROBOTS) instances of $(MAIN_ROBOT)."
-	@echo "--- To run the benchmark, open Robocode, go to Battle -> Open, and select $(BATTLE_FILE) ---"
+
+	@echo "--- Running benchmark battle (this may take a while) ---"
+	@java -Xmx512M -Dsun.java2d.noddraw=true --add-opens java.base/sun.net.www.protocol.jar=ALL-UNNAMED -cp "$(ROBOCODE_HOME)/libs/robocode.jar" robocode.Robocode \
+		-battle "$(CURDIR)/$(BATTLE_FILE)" \
+		-results "$(CURDIR)/$(RESULTS_FILE)" \
+		-nodisplay \
+		-nosound > battle.log 2>&1
+	@sleep 2
+	@echo "Benchmark battle finished. Results saved to $(RESULTS_FILE)."
+	@echo "Battle log saved to battle.log"
+	@echo "You can view the results in $(RESULTS_FILE)."
 
 # Cleans up compiled files and generated battle files/logs.
 clean:
 	@echo "--- Cleaning up project ---"
-	@rm -rf $(BIN_DIR) $(BATTLE_FILE)
+	@rm -rf $(BIN_DIR) $(BATTLE_FILE) $(RESULTS_FILE) robocode-debug.log battle.log
 	@rm -rf robocode_local # Remove locally downloaded Robocode
 	@echo "Clean up complete."
 
@@ -82,7 +95,7 @@ help:
 	@echo "Usage:"
 	@echo "  make build         - Compiles the Java source files."
 	@echo "  make install       - Installs Robocode and the robot using install.sh."
-	@echo "  make battle        - Creates a benchmark battle file. You must run it manually from the Robocode GUI."
+	@echo "  make battle        - Installs and builds the robot, then runs a benchmark battle."
 	@echo "  make clean         - Removes compiled classes and generated battle files/logs."
 	@echo ""
 	@echo "Setup:"

@@ -61,27 +61,22 @@ With `robocode.jar` in place, you can now use the `Makefile` to build and run th
     make install
     ```
 
-3.  **Create a Benchmark Battle File:** This command will generate a battle file named `benchmark.battle`.
+3.  **Run a Benchmark Battle:** This will build and install the robot, then generate a battle file and run a battle with multiple instances of your `mega.Boilerplate` robot. The results will be saved to `benchmark_results.txt`.
     ```bash
     make battle
     ```
+    *Note:* The `make battle` command runs Robocode in headless mode (`-nodisplay -nosound`) for faster benchmarking. You can inspect the `benchmark_results.txt` file for detailed results.
 
-4.  **Run the Benchmark Manually:**
-    *   Open your Robocode application.
-    *   Go to `Battle -> Open`.
-    *   Select the `benchmark.battle` file from this project's root directory.
-    *   Run the battle.
-
-5.  **Clean Up:** Remove compiled classes and generated battle files.
+4.  **Clean Up:** Remove compiled classes and generated battle files/logs.
     ```bash
     make clean
     ```
 
 ## Preliminary Benchmark Results
 
-*(This section should be updated by running the benchmark battle manually and recording the results from the Robocode GUI.)*
+*(This section should be updated after running the `make battle` command and analyzing `benchmark_results.txt`)*
 
-To get benchmark results, run the battle as described above and fill in the results here.
+Initial benchmark using `make battle` against 9 other `mega.Boilerplate` instances (total 10 robots) for 100 rounds:
 
 *   **Total Score:** [e.g., 5000 points]
 *   **Survival Rate:** [e.g., 60% (Robot survived 60 out of 100 rounds)]
