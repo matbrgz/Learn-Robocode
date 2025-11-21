@@ -4,7 +4,8 @@
 # Robocode Version to download if not found
 ROBOCODE_VERSION = 1.10.0
 ROBOCODE_BINARY_ZIP = robocode-$(ROBOCODE_VERSION)-binary.zip
-ROBOCODE_URL = https://downloads.sourceforge.net/project/robocode/robocode-stable/$(ROBOCODE_VERSION)/$(ROBOCODE_BINARY_ZIP)
+# SourceForge often redirects, so `curl -L` is more reliable than `wget` for direct downloads.
+ROBOCODE_URL = https://downloads.sourceforge.net/project/robocode/robocode-stable/$(ROBOCODE_VERSION)/$(ROBOCODE_BINARY_ZIP)/download
 
 # Local directory for Robocode installation if not provided by user
 ROBOCODE_LOCAL_INSTALL_DIR = robocode_local
@@ -44,6 +45,11 @@ all: build
 build:
 	@echo "--- Building Robocode robots ---"
 	@mkdir -p $(BIN_DIR)
+	@if [ ! -f "$(ROBOCODE_HOME)/libs/robocode.jar" ]; then \
+		echo "Error: $(ROBOCODE_HOME)/libs/robocode.jar not found."; \
+		echo "Please run 'make install' first or ensure ROBOCODE_HOME is set correctly."; \
+		exit 1; \
+	fi
 	javac -cp "$(ROBOCODE_HOME)/libs/robocode.jar" -d $(BIN_DIR) $(SRC_DIR)/*.java
 	@echo "Build complete. Classes are in $(BIN_DIR)"
 
@@ -57,12 +63,24 @@ download_robocode:
 		mkdir -p "$(ROBOCODE_LOCAL_INSTALL_DIR)"; \
 		if [ ! -f "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_BINARY_ZIP)" ]; then \
 			echo "Downloading Robocode $(ROBOCODE_VERSION)... This may take a moment."; \
-			wget -q --show-progress -O "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_BINARY_ZIP)" "$(ROBOCODE_URL)"; \
+			curl -L -o "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_BINARY_ZIP)" "$(ROBOCODE_URL)"; \
+			if [ $$? -ne 0 ]; then \
+				echo "Error: Download failed for Robocode from $(ROBOCODE_URL)."; \
+				exit 1; \
+			fi; \
 		else \
 			echo "Robocode binary zip already present: $(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_BINARY_ZIP)"; \
 		fi; \
 		echo "Extracting Robocode to $(ROBOCODE_LOCAL_INSTALL_DIR)..."; \
-		unzip -q "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_BINARY_ZIP)" -d "$(ROBOCODE_LOCAL_INSTALL_DIR)"; \
+		unzip -o "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_BINARY_ZIP)" -d "$(ROBOCODE_LOCAL_INSTALL_DIR)"; \
+		if [ $$? -ne 0 ]; then \
+			echo "Error: Failed to extract Robocode binary zip. It might be corrupted or not a valid zip file."; \
+			exit 1; \
+		fi; \
+		if [ ! -f "$(ROBOCODE_HOME)/libs/robocode.jar" ]; then \
+			echo "Error: robocode.jar not found in extracted directory. Robocode installation might be incomplete."; \
+			exit 1; \
+		fi; \
 		echo "Robocode $(ROBOCODE_VERSION) successfully installed locally to $(ROBOCODE_LOCAL_INSTALL_DIR)"; \
 	else \
 		echo "--- Robocode already found at $(ROBOCODE_HOME) ---"; \
@@ -132,5 +150,4 @@ help:
 	@echo "  NUM_ROUNDS: $(NUM_ROUNDS)"
 	@echo "  NUM_BENCHMARK_ROBOTS: $(NUM_BENCHMARK_ROBOTS)"
 	@echo ""
-	@echo "Note: 'wget' and 'unzip' commands are required for automatic Robocode download."
-	@echo "      'seq' command is required for battle file generation."
+	@echo "Note: 'curl -L', 'unzip', and 'seq' commands are required for automatic Robocode download and battle generation."
