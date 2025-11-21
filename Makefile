@@ -1,11 +1,11 @@
 # Makefile for Learn-Robocode Project
 
 # --- Configuration ---
-# Robocode Version to download if not found
+# Robocode Version
 ROBOCODE_VERSION = 1.10.0
-ROBOCODE_BINARY_ZIP = robocode-$(ROBOCODE_VERSION)-binary.zip
-# SourceForge often redirects, so `curl -L` is more reliable than `wget` for direct downloads.
-ROBOCODE_URL = https://downloads.sourceforge.net/project/robocode/robocode-stable/$(ROBOCODE_VERSION)/$(ROBOCODE_BINARY_ZIP)/download
+# Directly download robocode.jar from GitHub releases
+ROBOCODE_JAR_NAME = robocode.jar
+ROBOCODE_URL = https://github.com/robo-code/robocode/releases/download/VER_$(subst .,_,$(ROBOCODE_VERSION))/$(ROBOCODE_JAR_NAME)
 
 # Local directory for Robocode installation if not provided by user
 ROBOCODE_LOCAL_INSTALL_DIR = robocode_local
@@ -56,35 +56,98 @@ build:
 # Installs the compiled robot classes and ensures Robocode is present.
 install: download_robocode copy_robots
 
-# Downloads and extracts Robocode if it's not already present at $(ROBOCODE_HOME)
+# Downloads and sets up Robocode if it's not already present at $(ROBOCODE_HOME)
 download_robocode:
 	@if [ ! -d "$(ROBOCODE_HOME)/robots" ]; then \
 		echo "--- Robocode not found at $(ROBOCODE_HOME), attempting to download ---"; \
-		mkdir -p "$(ROBOCODE_LOCAL_INSTALL_DIR)"; \
-		if [ ! -f "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_BINARY_ZIP)" ]; then \
-			echo "Downloading Robocode $(ROBOCODE_VERSION)... This may take a moment."; \
-			curl -L -o "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_BINARY_ZIP)" "$(ROBOCODE_URL)"; \
+		mkdir -p "$(ROBOCODE_LOCAL_INSTALL_DIR)/libs"; \
+		mkdir -p "$(ROBOCODE_LOCAL_INSTALL_DIR)/robots"; \
+		if [ ! -f "$(ROBOCODE_LOCAL_INSTALL_DIR)/libs/$(ROBOCODE_JAR_NAME)" ]; then \
+			echo "Downloading Robocode $(ROBOCODE_VERSION) from GitHub Releases... This may take a moment."; \
+			curl -L -o "$(ROBOCODE_LOCAL_INSTALL_DIR)/libs/$(ROBOCODE_JAR_NAME)" "$(ROBOCODE_URL)"; \
 			if [ $$? -ne 0 ]; then \
 				echo "Error: Download failed for Robocode from $(ROBOCODE_URL)."; \
 				exit 1; \
 			fi; \
+			echo "Robocode $(ROBOCODE_VERSION) successfully downloaded to $(ROBOCODE_LOCAL_INSTALL_DIR)/libs/"; \
 		else \
-			echo "Robocode binary zip already present: $(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_BINARY_ZIP)"; \
+			echo "Robocode JAR already present: $(ROBOCODE_LOCAL_INSTALL_DIR)/libs/$(ROBOCODE_JAR_NAME)"; \
 		fi; \
-		echo "Extracting Robocode to $(ROBOCODE_LOCAL_INSTALL_DIR)..."; \
-		unzip -o "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_BINARY_ZIP)" -d "$(ROBOCODE_LOCAL_INSTALL_DIR)"; \
-		if [ $$? -ne 0 ]; then \
-			echo "Error: Failed to extract Robocode binary zip. It might be corrupted or not a valid zip file."; \
+		if [ ! -f "$(ROBOCODE_HOME)/libs/$(ROBOCODE_JAR_NAME)" ]; then \
+			echo "Error: robocode.jar not found after download. Robocode setup might be incomplete."; \
 			exit 1; \
 		fi; \
-		if [ ! -f "$(ROBOCODE_HOME)/libs/robocode.jar" ]; then \
-			echo "Error: robocode.jar not found in extracted directory. Robocode installation might be incomplete."; \
-			exit 1; \
-		fi; \
-		echo "Robocode $(ROBOCODE_VERSION) successfully installed locally to $(ROBOCODE_LOCAL_INSTALL_DIR)"; \
+		echo "Robocode setup complete in $(ROBOCODE_LOCAL_INSTALL_DIR)"; \
 	else \
 		echo "--- Robocode already found at $(ROBOCODE_HOME) ---"; \
 	fi
+
+# Copies the compiled robots into the Robocode installation's robots directory.
+copy_robots: build
+	@echo "--- Copying $(MAIN_ROBOT) to $(ROBOCODE_HOME)/robots/mega/ ---"
+	@mkdir -p "$(ROBOCODE_HOME)/robots/mega/"
+	@cp -r $(BIN_DIR)/* "$(ROBOCODE_HOME)/robots/mega/"
+	@echo "Robot $(MAIN_ROBOT) installed to $(ROBOCODE_HOME)/robots/mega/"
+	@echo "Installation complete. If Robocode GUI is open, you may need to refresh it (Battle -> New Battle)."
+
+# Creates a .battle file for benchmarking and runs it.
+# The battle will consist of NUM_BENCHMARK_ROBOTS instances of our MAIN_ROBOT.
+battle: install
+	@echo "--- Generating benchmark battle file: $(BATTLE_FILE) ---"
+	@echo "#Robocode Battle file" > $(BATTLE_FILE)
+	@echo "numRounds=$(NUM_ROUNDS)" >> $(BATTLE_FILE)
+	@echo "battlefield.width=800" >> $(BATTLE_FILE)
+	@echo "battlefield.height=600" >> $(BATTLE_FILE)
+	@echo "gunCoolingRate=0.1" >> $(BATTLE_FILE)
+	@echo "inactivityTime=450" >> $(BATTLE_FILE)
+	@echo "hideEnemyNames=false" >> $(BATTLE_FILE)
+	@echo "sentryRobot=null" >> $(BATTLE_FILE)
+	@for i in $(seq 1 $(NUM_BENCHMARK_ROBOTS)); do \
+		echo "robot.$${i}=$(MAIN_ROBOT) $(MAIN_ROBOT)$${i}" >> $(BATTLE_FILE); \
+	done
+	@echo "Generated $(BATTLE_FILE) with $(NUM_BENCHMARK_ROBOTS) instances of $(MAIN_ROBOT)."
+
+	@echo "--- Running benchmark battle (this may take a while) ---"
+	@java -Xmx512M -Dsun.java2d.nodraw=true -cp "$(ROBOCODE_HOME)/libs/robocode.jar" robocode.Robocode \
+		-battle $(BATTLE_FILE) \
+		-results $(RESULTS_XML) \
+		-nodisplay \
+		-hidden \
+		-nosound
+	@echo "Benchmark battle finished. Results saved to $(RESULTS_XML)."
+	@echo "You can view the raw XML results in $(RESULTS_XML)."
+	@echo "To extract summary, you might need a script or manual inspection."
+
+# Cleans up compiled files and generated battle files/logs.
+clean:
+	@echo "--- Cleaning up project ---"
+	@rm -rf $(BIN_DIR) $(BATTLE_FILE) $(RESULTS_XML) robocode-debug.log
+	@rm -rf $(ROBOCODE_LOCAL_INSTALL_DIR) # Remove locally downloaded Robocode
+	@echo "Clean up complete."
+
+help:
+	@echo "Makefile for Learn-Robocode Project"
+	@echo ""
+	@echo "Usage:"
+	@echo "  make build         - Compiles the Java source files."
+	@echo "  make install       - Ensures Robocode is available (downloads if necessary)"
+	@echo "                       and copies compiled robots to the Robocode installation."
+	@echo "  make battle        - Builds and installs the robots, then runs a benchmark battle"
+	@echo "                       with $(NUM_BENCHMARK_ROBOTS) instances of $(MAIN_ROBOT)."
+	@echo "                       Results are saved to $(RESULTS_XML)."
+	@echo "  make clean         - Removes compiled classes, generated battle files/logs,"
+	@echo "                       and the locally downloaded Robocode installation (if any)."
+	@echo "  make help          - Displays this help message."
+	@echo ""
+	@echo "Configuration:"
+	@echo "  ROBOCODE_HOME: $(ROBOCODE_HOME) (Can be overridden by environment variable)"
+	@echo "                 If not set, Robocode will be downloaded to $(ROBOCODE_LOCAL_INSTALL_DIR)."
+	@echo "  ROBOCODE_VERSION: $(ROBOCODE_VERSION)"
+	@echo "  NUM_ROUNDS: $(NUM_ROUNDS)"
+	@echo "  NUM_BENCHMARK_ROBOTS: $(NUM_BENCHMARK_ROBOTS)"
+	@echo ""
+	@echo "Note: 'curl -L', 'unzip', and 'seq' commands are required for automatic Robocode download and battle generation."
+
 
 # Copies the compiled robots into the Robocode installation's robots directory.
 copy_robots: build
