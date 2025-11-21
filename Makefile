@@ -71,7 +71,7 @@ download_robocode:
 		else \
 			echo "Robocode setup JAR already present: $(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_SETUP_JAR)"; \
 		fi; \
-		ifeq ($(HEADLESS),true)
+		if [ "$(HEADLESS)" = "true" ]; then \
 			echo "--- Running Robocode installer in headless mode ---"; \
 			echo "Generating auto-install.xml for headless installation..."; \
 			echo '<izpack:installation version="5.0">' > auto-install.xml; \
@@ -80,12 +80,12 @@ download_robocode:
 			echo '</izpack:installation>' >> auto-install.xml; \
 			(cd $(ROBOCODE_LOCAL_INSTALL_DIR) && java -jar $(ROBOCODE_SETUP_JAR) ../auto-install.xml); \
 			rm auto-install.xml; \
-		else
+		else \
 			echo "--- Starting interactive Robocode installer ---"; \
 			echo "Please follow the GUI installer instructions."; \
 			echo "It is recommended to install to the default location: $(CURDIR)/$(ROBOCODE_LOCAL_INSTALL_DIR)"; \
 			java -jar "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_SETUP_JAR)"; \
-		endif
+		fi; \
 		if [ ! -f "$(ROBOCODE_HOME)/libs/robocode.jar" ]; then \
 			echo "Error: robocode.jar not found after installation. The installation might have failed or was cancelled."; \
 			exit 1; \
