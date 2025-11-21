@@ -75,6 +75,9 @@ battle: install
 	echo "robocode.battle.selectedRobots=$${ROBOT_LIST}" >> $(BATTLE_FILE)
 	@echo "Generated $(BATTLE_FILE) with $(NUM_BENCHMARK_ROBOTS) instances of $(ROBOT_CLASS)."
 
+	@echo "--- Clearing Robocode robot cache ---"
+	@rm -rf "$(ROBOCODE_HOME)/robots/.data"
+
 	@echo "--- Starting Robocode battle with GUI ---"
 	@java -Xmx512M \
 		-Dsun.java2d.noddraw=true \
