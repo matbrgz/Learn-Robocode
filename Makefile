@@ -55,7 +55,7 @@ build:
 # Installs the compiled robot classes and ensures Robocode is present.
 install: download_robocode copy_robots
 
-# Downloads and installs Robocode using the setup JAR in headless console mode.
+# Downloads and installs Robocode using the setup JAR in headless mode.
 download_robocode:
 	@if [ ! -d "$(ROBOCODE_HOME)/libs" ]; then \
 		echo "--- Robocode not found at $(ROBOCODE_HOME), attempting to download and install ---"; \
@@ -70,13 +70,19 @@ download_robocode:
 		else \
 			echo "Robocode setup JAR already present: $(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_SETUP_JAR)"; \
 		fi; \
-		echo "Running Robocode installer in console mode..."; \
-		printf "$(CURDIR)/$(ROBOCODE_LOCAL_INSTALL_DIR)\n0\n" | java -jar "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_SETUP_JAR)" -console; \
+		echo "Generating auto-install.xml for headless installation..."; \
+		echo '<izpack:installation version="5.0">' > auto-install.xml; \
+		echo '    <installpath>$(CURDIR)/$(ROBOCODE_LOCAL_INSTALL_DIR)</installpath>' >> auto-install.xml; \
+		echo '    <pack name="Robocode" index="0" selected="true"/>' >> auto-install.xml; \
+		echo '</izpack:installation>' >> auto-install.xml; \
+		echo "Running Robocode installer headlessly from within its directory..."; \
+		(cd $(ROBOCODE_LOCAL_INSTALL_DIR) && java -jar $(ROBOCODE_SETUP_JAR) ../auto-install.xml); \
+		rm auto-install.xml; \
 		if [ ! -f "$(ROBOCODE_HOME)/libs/robocode.jar" ]; then \
-			echo "Error: robocode.jar not found after installation. The console installation might have failed."; \
+			echo "Error: robocode.jar not found after installation. The headless installation might have failed."; \
 			exit 1; \
 		fi; \
-		echo "Robocode $(ROBOCODE_VERSION) successfully installed locally to $(ROBOCODE_LOCAL_INSTALL_DIR)"; \
+		echo "Robocode $(ROBOCODE_VERSION) successfully installed locally to $(ROBOCODE_LOCAL_INSTALL_DIR)" \
 	else \
 		echo "--- Robocode already found at $(ROBOCODE_HOME) ---"; \
 	fi
