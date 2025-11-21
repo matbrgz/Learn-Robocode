@@ -47,13 +47,11 @@ build:
 install: build
 	@echo "--- Running installation script (if necessary) ---"
 	@./install.sh
-	@echo "--- Cleaning and copying robot to $(ROBOCODE_HOME)/robots/ ---"
-	@if [ ! -d "$(ROBOCODE_HOME)/robots" ]; then \
-		mkdir -p "$(ROBOCODE_HOME)/robots"; \
-	fi
+	@echo "--- Cleaning and copying robot to $(ROBOCODE_HOME)/robots/mega/ ---"
 	@rm -rf "$(ROBOCODE_HOME)/robots/mega"
-	@cp -r $(BIN_DIR)/* "$(ROBOCODE_HOME)/robots/"
-	@echo "Robot $(MAIN_ROBOT) installed to $(ROBOCODE_HOME)/robots/"
+	@mkdir -p "$(ROBOCODE_HOME)/robots/mega"
+	@cp -r $(BIN_DIR)/mega/* "$(ROBOCODE_HOME)/robots/mega/"
+	@echo "Robot $(MAIN_ROBOT) installed to $(ROBOCODE_HOME)/robots/mega/"
 
 # Creates a .battle file and runs it with the Robocode GUI.
 battle: install
