@@ -1,0 +1,17 @@
+#Battle Properties
+#Fri Nov 21 18:33:38 BRT 2025
+robocode.battle.numRounds=10
+battlefield.width=800
+battlefield.height=600
+robocode.battle.gunCoolingRate=0.1
+robocode.battleField.height=600
+robocode.battleField.width=800
+robocode.battle.rules.inactivityTime=450
+numRounds=100
+robocode.battle.hideEnemyNames=false
+sentryRobot=null
+hideEnemyNames=false
+inactivityTime=450
+robocode.battle.sentryBorderSize=100
+robocode.battle.selectedRobots=mega.Boilerplate 1.0,sample.Corners,sample.Crazy,sample.Fire,sample.Interactive,sample.Interactive_v2,sample.MyFirstJuniorRobot,sample.MyFirstRobot,sample.PaintingRobot,sample.RamFire,sample.SittingDuck,sample.SpinBot,sample.Target,sample.Tracker,sample.TrackFire,sample.VelociRobot,sample.Walls,sampleex.Alien,sampleex.AlienComposition,sampleex.MasterAndSlave,sampleex.ProxyOfGreyEminence,sampleex.Slave,samplesentry.BorderGuard,sampleteam.MyFirstDroid,sampleteam.MyFirstLeader,sampleteam.MyFirstTeam
+gunCoolingRate=0.1
