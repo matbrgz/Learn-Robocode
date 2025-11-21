@@ -25,6 +25,9 @@ NUM_BENCHMARK_ROBOTS = 10
 # Name of the battle file to generate
 BATTLE_FILE = benchmark.battle
 
+# Name of the results file
+RESULTS_FILE = benchmark_results.txt
+
 # --- Targets ---
 
 .PHONY: all build package install setup run battle clean help
@@ -80,11 +83,14 @@ run: setup
 	@echo "--- Starting Robocode battle with GUI ---"
 	@java -Xmx512M \
 		-Dsun.java2d.noddraw=true \
+		-DROBOTPATH="$(ROBOCODE_HOME)/robots" \
 		--add-opens java.base/sun.net.www.protocol.jar=ALL-UNNAMED \
-		-cp "$(ROBOCODE_HOME)/libs/robocode.jar:$(ROBOCODE_HOME)/robots/$(ROBOT_JAR)" \
+		-cp "$(ROBOCODE_HOME)/libs/robocode.jar" \
 		robocode.Robocode \
 		-battle "$(CURDIR)/$(BATTLE_FILE)" \
-		-tps 30
+		-results "$(CURDIR)/$(RESULTS_FILE)" \
+		-tps 30 \
+		-nosound
 
 # Alias for 'run'
 battle: run
@@ -92,7 +98,7 @@ battle: run
 # Cleans up compiled files and generated battle files/logs.
 clean:
 	@echo "--- Cleaning up project ---"
-	@rm -rf $(BIN_DIR) $(BATTLE_FILE) $(ROBOT_JAR)
+	@rm -rf $(BIN_DIR) $(BATTLE_FILE) $(RESULTS_FILE) robocode-debug.log battle.log $(ROBOT_JAR)
 	@rm -rf robocode_local # Remove locally downloaded Robocode
 	@echo "Clean up complete."
 
