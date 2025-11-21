@@ -6,7 +6,7 @@
 ROBOCODE_HOME ?= $(CURDIR)/robocode_local
 
 # Output directory for compiled classes
-BIN_DIR = bin/mega
+BIN_DIR = bin
 
 # Source directory for Java files
 SRC_DIR = src/mega
@@ -47,13 +47,12 @@ build:
 install: build
 	@echo "--- Running installation script (if necessary) ---"
 	@./install.sh
-	@echo "--- Copying robot to $(ROBOCODE_HOME)/robots/mega/ ---"
+	@echo "--- Copying robot to $(ROBOCODE_HOME)/robots/ ---"
 	@if [ ! -d "$(ROBOCODE_HOME)/robots" ]; then \
 		mkdir -p "$(ROBOCODE_HOME)/robots"; \
 	fi
-	@mkdir -p "$(ROBOCODE_HOME)/robots/mega/"
-	@cp -r $(BIN_DIR)/* "$(ROBOCODE_HOME)/robots/mega/"
-	@echo "Robot $(MAIN_ROBOT) installed to $(ROBOCODE_HOME)/robots/mega/"
+	@cp -r $(BIN_DIR)/* "$(ROBOCODE_HOME)/robots/"
+	@echo "Robot $(MAIN_ROBOT) installed to $(ROBOCODE_HOME)/robots/"
 
 # Creates a .battle file and runs it with the Robocode GUI.
 battle: install
