@@ -9,10 +9,10 @@ ROBOCODE_HOME ?= $(CURDIR)/robocode_local
 BIN_DIR = bin
 
 # Source directory for Java files
-SRC_DIR = src/mega
+SRC_DIR = src
 
 # Robot Info
-ROBOT_CLASS = mega.Boilerplate
+ROBOT_CLASS = Boilerplate
 
 # Number of rounds for the benchmark battle
 NUM_ROUNDS = 100
@@ -38,8 +38,8 @@ build:
 	fi
 	@rm -rf $(BIN_DIR)
 	@mkdir -p $(BIN_DIR)/mega
-	javac -cp "$(ROBOCODE_HOME)/libs/robocode.jar" -d $(BIN_DIR) $(SRC_DIR)/*.java
-	@cp $(SRC_DIR)/*.properties $(BIN_DIR)/mega/
+	javac -cp "$(ROBOCODE_HOME)/libs/robocode.jar" -d $(BIN_DIR) $(SRC_DIR)/mega/*.java
+	@cp $(SRC_DIR)/mega/*.properties $(BIN_DIR)/mega/
 	@echo "Build complete."
 
 # Installs Robocode (if needed) and the compiled robot (loose class files).
@@ -63,7 +63,7 @@ setup: install
 	@echo "robocode.battle.rules.inactivityTime=450" >> $(BATTLE_FILE)
 	@ROBOT_LIST=""; \
 	for i in $$(seq 1 $(NUM_BENCHMARK_ROBOTS)); do \
-		ROBOT_LIST="$${ROBOT_LIST}$(ROBOT_CLASS)*,"; \
+		ROBOT_LIST="$${ROBOT_LIST}mega.$(ROBOT_CLASS)*,"; \
 	done; \
 	echo "robocode.battle.selectedRobots=$${ROBOT_LIST}" >> $(BATTLE_FILE)
 	@echo "Generated $(BATTLE_FILE) with $(NUM_BENCHMARK_ROBOTS) instances of $(ROBOT_CLASS)."
