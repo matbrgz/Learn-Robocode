@@ -61,28 +61,21 @@ With `robocode.jar` in place, you can now use the `Makefile` to build and run th
     make install
     ```
 
-3.  **Run a Benchmark Battle:** This will build and install the robot, then generate a battle file and run a battle with multiple instances of your `mega.Boilerplate` robot. The results will be saved to `benchmark_results.txt`.
+3.  **Run a Benchmark Battle:** This command will build and install the robot, then generate a battle file and automatically start the battle in the Robocode GUI.
     ```bash
     make battle
     ```
-    *Note:* The `make battle` command runs Robocode in headless mode (`-nodisplay -nosound`) for faster benchmarking. You can inspect the `benchmark_results.txt` file for detailed results.
+    *Note: The results can be observed in the GUI and will be saved to `benchmark_results.txt` upon completion.*
 
-4.  **Clean Up:** Remove compiled classes and generated battle files/logs.
+4.  **Clean Up:** Remove compiled classes, generated battle files, and logs.
     ```bash
     make clean
     ```
 
 ## Preliminary Benchmark Results
 
-*(This section should be updated after running the `make battle` command and analyzing `benchmark_results.txt`)*
+*(This section should be updated by running the benchmark battle and recording the results from the Robocode GUI or the `benchmark_results.txt` file.)*
 
-Initial benchmark using `make battle` against 9 other `mega.Boilerplate` instances (total 10 robots) for 100 rounds:
-
-*   **Total Score:** [e.g., 5000 points]
-*   **Survival Rate:** [e.g., 60% (Robot survived 60 out of 100 rounds)]
-*   **Win Rate:** [e.g., 10% (Robot was the last one standing in 10 rounds)]
-*   **Damage Dealt:** [e.g., 1500 points]
-*   **Damage Taken:** [e.g., 1000 points]
-*   **Avg. Enemy Score:** [e.g., 450 points]
+To get benchmark results, run `make battle` and fill in the results here.
 
 These results provide a baseline for evaluating further improvements to the robot's AI components.
