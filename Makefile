@@ -73,8 +73,8 @@ battle: install
 
 	@echo "--- Running benchmark battle (this may take a while) ---"
 	@java -Xmx512M -Dsun.java2d.nodraw=true -cp "$(ROBOCODE_HOME)/libs/robocode.jar" robocode.Robocode \
-		-battle $(BATTLE_FILE) \
-		-results $(RESULTS_XML) \
+		-battle "$(CURDIR)/$(BATTLE_FILE)" \
+		-results "$(CURDIR)/$(RESULTS_XML)" \
 		-nodisplay \
 		-nosound
 	@echo "Benchmark battle finished. Results saved to $(RESULTS_XML)."
