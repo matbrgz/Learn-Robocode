@@ -47,10 +47,11 @@ build:
 install: build
 	@echo "--- Running installation script (if necessary) ---"
 	@./install.sh
-	@echo "--- Copying robot to $(ROBOCODE_HOME)/robots/ ---"
+	@echo "--- Cleaning and copying robot to $(ROBOCODE_HOME)/robots/ ---"
 	@if [ ! -d "$(ROBOCODE_HOME)/robots" ]; then \
 		mkdir -p "$(ROBOCODE_HOME)/robots"; \
 	fi
+	@rm -rf "$(ROBOCODE_HOME)/robots/mega"
 	@cp -r $(BIN_DIR)/* "$(ROBOCODE_HOME)/robots/"
 	@echo "Robot $(MAIN_ROBOT) installed to $(ROBOCODE_HOME)/robots/"
 
