@@ -25,9 +25,6 @@ NUM_BENCHMARK_ROBOTS = 10
 # Name of the battle file to generate
 BATTLE_FILE = benchmark.battle
 
-# Name of the results file
-RESULTS_FILE = benchmark_results.txt
-
 # --- Targets ---
 
 .PHONY: all build package install battle clean help
@@ -59,7 +56,7 @@ install: package
 	@cp $(ROBOT_JAR) "$(ROBOCODE_HOME)/robots/"
 	@echo "Robot $(ROBOT_JAR) installed."
 
-# Creates a .battle file and runs it with the Robocode GUI.
+# Creates a .battle file for the user to run manually.
 battle: install
 	@echo "--- Generating benchmark battle file: $(BATTLE_FILE) ---"
 	@echo "#Robocode Battle file" > $(BATTLE_FILE)
@@ -74,25 +71,13 @@ battle: install
 	done; \
 	echo "robocode.battle.selectedRobots=$${ROBOT_LIST}" >> $(BATTLE_FILE)
 	@echo "Generated $(BATTLE_FILE) with $(NUM_BENCHMARK_ROBOTS) instances of $(ROBOT_CLASS)."
-
-	@echo "--- Clearing Robocode robot cache ---"
-	@rm -rf "$(ROBOCODE_HOME)/robots/.data"
-
-	@echo "--- Starting Robocode battle with GUI ---"
-	@java -Xmx512M \
-		-Dsun.java2d.noddraw=true \
-		--add-opens java.base/sun.net.www.protocol.jar=ALL-UNNAMED \
-		-cp "$(ROBOCODE_HOME)/libs/robocode.jar" \
-		robocode.Robocode \
-		-battle "$(CURDIR)/$(BATTLE_FILE)" \
-		-results "$(CURDIR)/$(RESULTS_FILE)" \
-		-tps 30 \
-		-nosound
+	@echo ""
+	@echo "--- To run the benchmark, open Robocode, go to Battle -> Open, and select $(BATTLE_FILE) ---"
 
 # Cleans up compiled files and generated battle files/logs.
 clean:
 	@echo "--- Cleaning up project ---"
-	@rm -rf $(BIN_DIR) $(BATTLE_FILE) $(RESULTS_FILE) robocode-debug.log battle.log $(ROBOT_JAR)
+	@rm -rf $(BIN_DIR) $(BATTLE_FILE) $(ROBOT_JAR)
 	@rm -rf robocode_local # Remove locally downloaded Robocode
 	@echo "Clean up complete."
 
@@ -103,7 +88,7 @@ help:
 	@echo "  make build         - Compiles the Java source files."
 	@echo "  make package       - Packages the compiled classes into a JAR file."
 	@echo "  make install       - Installs Robocode and the robot JAR."
-	@echo "  make battle        - Installs and builds the robot, then runs a benchmark battle with the GUI."
+	@echo "  make battle        - Creates a benchmark battle file to be run from the GUI."
 	@echo "  make clean         - Removes compiled classes and generated files."
 	@echo ""
 	@echo "Setup:"

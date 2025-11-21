@@ -61,21 +61,27 @@ With `robocode.jar` in place, you can now use the `Makefile` to build and run th
     make install
     ```
 
-3.  **Run a Benchmark Battle:** This command will build and install the robot, then generate a battle file and automatically start the battle in the Robocode GUI.
+3.  **Create a Benchmark Battle File:** This command will package the robot and generate a battle file named `benchmark.battle`.
     ```bash
     make battle
     ```
-    *Note: The results can be observed in the GUI and will be saved to `benchmark_results.txt` upon completion.*
 
-4.  **Clean Up:** Remove compiled classes, generated battle files, and logs.
+4.  **Run the Benchmark Manually:**
+    *   Open your Robocode application (run `robocode.sh` or `robocode.bat` from the installation directory).
+    *   Go to `Options -> Preferences -> Development Options` and add the full path to this project's `bin` directory to your development paths. Click OK.
+    *   Go to `Battle -> Open`.
+    *   Select the `benchmark.battle` file from this project's root directory.
+    *   Run the battle.
+
+5.  **Clean Up:** Remove compiled classes and generated files.
     ```bash
     make clean
     ```
 
 ## Preliminary Benchmark Results
 
-*(This section should be updated by running the benchmark battle and recording the results from the Robocode GUI or the `benchmark_results.txt` file.)*
+*(This section should be updated by running the benchmark battle manually and recording the results from the Robocode GUI.)*
 
-To get benchmark results, run `make battle` and fill in the results here.
+To get benchmark results, run the battle as described above and fill in the results here.
 
 These results provide a baseline for evaluating further improvements to the robot's AI components.
