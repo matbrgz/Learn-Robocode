@@ -5,7 +5,7 @@
 ROBOCODE_VERSION = 1.10.0
 # Directly download robocode.jar from GitHub releases
 ROBOCODE_JAR_NAME = robocode.jar
-ROBOCODE_URL = https://github.com/robo-code/robocode/releases/download/VER_$(subst .,_,$(ROBOCODE_VERSION))/$(ROBOCODE_JAR_NAME)
+ROBOCODE_URL = https://github.com/robo-code/robocode/releases/download/v$(ROBOCODE_VERSION)/$(ROBOCODE_JAR_NAME)
 
 # Local directory for Robocode installation if not provided by user
 ROBOCODE_LOCAL_INSTALL_DIR = robocode_local
@@ -149,68 +149,3 @@ help:
 	@echo "Note: 'curl -L', 'unzip', and 'seq' commands are required for automatic Robocode download and battle generation."
 
 
-# Copies the compiled robots into the Robocode installation's robots directory.
-copy_robots: build
-	@echo "--- Copying $(MAIN_ROBOT) to $(ROBOCODE_HOME)/robots/mega/ ---"
-	@mkdir -p "$(ROBOCODE_HOME)/robots/mega/"
-	@cp -r $(BIN_DIR)/* "$(ROBOCODE_HOME)/robots/mega/"
-	@echo "Robot $(MAIN_ROBOT) installed to $(ROBOCODE_HOME)/robots/mega/"
-	@echo "Installation complete. If Robocode GUI is open, you may need to refresh it (Battle -> New Battle)."
-
-# Creates a .battle file for benchmarking and runs it.
-# The battle will consist of NUM_BENCHMARK_ROBOTS instances of our MAIN_ROBOT.
-battle: install
-	@echo "--- Generating benchmark battle file: $(BATTLE_FILE) ---"
-	@echo "#Robocode Battle file" > $(BATTLE_FILE)
-	@echo "numRounds=$(NUM_ROUNDS)" >> $(BATTLE_FILE)
-	@echo "battlefield.width=800" >> $(BATTLE_FILE)
-	@echo "battlefield.height=600" >> $(BATTLE_FILE)
-	@echo "gunCoolingRate=0.1" >> $(BATTLE_FILE)
-	@echo "inactivityTime=450" >> $(BATTLE_FILE)
-	@echo "hideEnemyNames=false" >> $(BATTLE_FILE)
-	@echo "sentryRobot=null" >> $(BATTLE_FILE)
-	@for i in $(seq 1 $(NUM_BENCHMARK_ROBOTS)); do \
-		echo "robot.$${i}=$(MAIN_ROBOT) $(MAIN_ROBOT)$${i}" >> $(BATTLE_FILE); \
-	done
-	@echo "Generated $(BATTLE_FILE) with $(NUM_BENCHMARK_ROBOTS) instances of $(MAIN_ROBOT)."
-
-	@echo "--- Running benchmark battle (this may take a while) ---"
-	@java -Xmx512M -Dsun.java2d.noddraw=true -cp "$(ROBOCODE_HOME)/libs/robocode.jar" robocode.Robocode \
-		-battle $(BATTLE_FILE) \
-		-results $(RESULTS_XML) \
-		-nodisplay \
-		-hidden \
-		-nosound
-	@echo "Benchmark battle finished. Results saved to $(RESULTS_XML)."
-	@echo "You can view the raw XML results in $(RESULTS_XML)."
-	@echo "To extract summary, you might need a script or manual inspection."
-
-# Cleans up compiled files and generated battle files/logs.
-clean:
-	@echo "--- Cleaning up project ---"
-	@rm -rf $(BIN_DIR) $(BATTLE_FILE) $(RESULTS_XML) robocode-debug.log
-	@rm -rf $(ROBOCODE_LOCAL_INSTALL_DIR) # Remove locally downloaded Robocode
-	@echo "Clean up complete."
-
-help:
-	@echo "Makefile for Learn-Robocode Project"
-	@echo ""
-	@echo "Usage:"
-	@echo "  make build         - Compiles the Java source files."
-	@echo "  make install       - Ensures Robocode is available (downloads if necessary)"
-	@echo "                       and copies compiled robots to the Robocode installation."
-	@echo "  make battle        - Builds and installs the robots, then runs a benchmark battle"
-	@echo "                       with $(NUM_BENCHMARK_ROBOTS) instances of $(MAIN_ROBOT)."
-	@echo "                       Results are saved to $(RESULTS_XML)."
-	@echo "  make clean         - Removes compiled classes, generated battle files/logs,"
-	@echo "                       and the locally downloaded Robocode installation (if any)."
-	@echo "  make help          - Displays this help message."
-	@echo ""
-	@echo "Configuration:"
-	@echo "  ROBOCODE_HOME: $(ROBOCODE_HOME) (Can be overridden by environment variable)"
-	@echo "                 If not set, Robocode will be downloaded to $(ROBOCODE_LOCAL_INSTALL_DIR)."
-	@echo "  ROBOCODE_VERSION: $(ROBOCODE_VERSION)"
-	@echo "  NUM_ROUNDS: $(NUM_ROUNDS)"
-	@echo "  NUM_BENCHMARK_ROBOTS: $(NUM_BENCHMARK_ROBOTS)"
-	@echo ""
-	@echo "Note: 'curl -L', 'unzip', and 'seq' commands are required for automatic Robocode download and battle generation."
