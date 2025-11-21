@@ -2,10 +2,9 @@
 
 # --- Configuration ---
 # Robocode Version
-ROBOCODE_VERSION = 1.10.0
-# Directly download robocode.jar from GitHub releases
+ROBOCODE_VERSION = 1.9.3.6
 ROBOCODE_JAR_NAME = robocode.jar
-ROBOCODE_URL = https://github.com/robo-code/robocode/releases/download/v$(ROBOCODE_VERSION)/$(ROBOCODE_JAR_NAME)
+ROBOCODE_URL = https://downloads.sourceforge.net/project/robocode/robocode-stable/$(ROBOCODE_VERSION)/$(ROBOCODE_JAR_NAME)
 
 # Local directory for Robocode installation if not provided by user
 ROBOCODE_LOCAL_INSTALL_DIR = robocode_local
