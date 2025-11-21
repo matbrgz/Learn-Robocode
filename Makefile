@@ -34,7 +34,7 @@ RESULTS_FILE = benchmark_results.txt
 
 all: build
 
-# Builds the Robocode robot(s) by compiling Java source files and copying resources.
+# Builds the Robocode robot(s) by compiling Java source files.
 build:
 	@echo "--- Building Robocode robots ---"
 	@if [ ! -f "$(ROBOCODE_HOME)/libs/robocode.jar" ]; then \
@@ -44,14 +44,17 @@ build:
 	@rm -rf $(BIN_DIR)
 	@mkdir -p $(BIN_DIR)
 	javac -cp "$(ROBOCODE_HOME)/libs/robocode.jar" -d $(BIN_DIR) $(SRC_DIR)/*.java
-	@echo "Copying .properties files..."
-	@cp $(SRC_DIR)/*.properties $(BIN_DIR)/mega/
 	@echo "Build complete."
 
 # Packages the compiled classes into a JAR file.
 package: build
 	@echo "--- Packaging robot into JAR file: $(ROBOT_JAR) ---"
-	@jar -cvf $(ROBOT_JAR) -C $(BIN_DIR) .
+	@rm -rf jar-root
+	@mkdir -p jar-root/mega
+	@cp -r $(BIN_DIR)/mega/* jar-root/mega/
+	@cp $(SRC_DIR)/*.properties jar-root/mega/
+	@jar -cvf $(ROBOT_JAR) -C jar-root .
+	@rm -rf jar-root
 
 # Installs Robocode (if needed) and the robot JAR.
 install: package
@@ -84,6 +87,7 @@ run: setup
 	@echo "--- Starting Robocode battle with GUI ---"
 	@java -Xmx512M \
 		-Dsun.java2d.noddraw=true \
+		-DROBOTPATH="$(ROBOCODE_HOME)/robots" \
 		--add-opens java.base/sun.net.www.protocol.jar=ALL-UNNAMED \
 		-cp "$(ROBOCODE_HOME)/libs/robocode.jar" \
 		robocode.Robocode \
@@ -98,7 +102,7 @@ battle: run
 # Cleans up compiled files and generated battle files/logs.
 clean:
 	@echo "--- Cleaning up project ---"
-	@rm -rf $(BIN_DIR) $(BATTLE_FILE) $(RESULTS_FILE) robocode-debug.log battle.log $(ROBOT_JAR)
+	@rm -rf $(BIN_DIR) $(BATTLE_FILE) $(RESULTS_FILE) robocode-debug.log battle.log $(ROBOT_JAR) jar-root
 	@rm -rf robocode_local # Remove locally downloaded Robocode
 	@echo "Clean up complete."
 
