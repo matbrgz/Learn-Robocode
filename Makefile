@@ -57,21 +57,22 @@ install: build
 battle: install
 	@echo "--- Generating benchmark battle file: $(BATTLE_FILE) ---"
 	@echo "#Robocode Battle file" > $(BATTLE_FILE)
-	@echo "numRounds=$(NUM_ROUNDS)" >> $(BATTLE_FILE)
-	@echo "battlefield.width=800" >> $(BATTLE_FILE)
-	@echo "battlefield.height=600" >> $(BATTLE_FILE)
-	@echo "gunCoolingRate=0.1" >> $(BATTLE_FILE)
-	@echo "inactivityTime=450" >> $(BATTLE_FILE)
-	@echo "hideEnemyNames=false" >> $(BATTLE_FILE)
-	@echo "sentryRobot=null" >> $(BATTLE_FILE)
-	@for i in $(seq 1 $(NUM_BENCHMARK_ROBOTS)); do \
-		echo "robot.$${i}=$(MAIN_ROBOT) $(MAIN_ROBOT)$${i}" >> $(BATTLE_FILE); \
-	done
+	@echo "robocode.battle.numRounds=$(NUM_ROUNDS)" >> $(BATTLE_FILE)
+	@echo "robocode.battleField.width=800" >> $(BATTLE_FILE)
+	@echo "robocode.battleField.height=600" >> $(BATTLE_FILE)
+	@echo "robocode.battle.gunCoolingRate=0.1" >> $(BATTLE_FILE)
+	@echo "robocode.battle.rules.inactivityTime=450" >> $(BATTLE_FILE)
+	@ROBOT_LIST=""; \
+	for i in $$(seq 1 $(NUM_BENCHMARK_ROBOTS)); do \
+		ROBOT_LIST="$${ROBOT_LIST}$(MAIN_ROBOT)*,"; \
+	done; \
+	echo "robocode.battle.selectedRobots=$${ROBOT_LIST}" >> $(BATTLE_FILE)
 	@echo "Generated $(BATTLE_FILE) with $(NUM_BENCHMARK_ROBOTS) instances of $(MAIN_ROBOT)."
 
 	@echo "--- Starting Robocode battle with GUI ---"
 	@java -Xmx512M \
 		-Dsun.java2d.noddraw=true \
+		-DROBOTPATH="$(ROBOCODE_HOME)/robots" \
 		--add-opens java.base/sun.net.www.protocol.jar=ALL-UNNAMED \
 		-cp "$(ROBOCODE_HOME)/libs/robocode.jar:$(CURDIR)/bin" \
 		robocode.Robocode \
