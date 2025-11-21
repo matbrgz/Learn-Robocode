@@ -11,8 +11,10 @@ BIN_DIR = bin
 # Source directory for Java files
 SRC_DIR = src/mega
 
-# Name of the main robot class (fully qualified)
-MAIN_ROBOT = mega.Boilerplate
+# Robot Info
+ROBOT_CLASS = mega.Boilerplate
+ROBOT_VERSION = 1.0
+ROBOT_JAR = $(ROBOT_CLASS)_$(ROBOT_VERSION).jar
 
 # Number of rounds for the benchmark battle
 NUM_ROUNDS = 100
@@ -28,7 +30,7 @@ RESULTS_FILE = benchmark_results.txt
 
 # --- Targets ---
 
-.PHONY: all build install battle clean help
+.PHONY: all build package install battle clean help
 
 all: build
 
@@ -39,19 +41,23 @@ build:
 		echo "Error: Robocode is not installed. Please run 'make install' first."; \
 		exit 1; \
 	fi
+	@rm -rf $(BIN_DIR)
 	@mkdir -p $(BIN_DIR)
 	javac -cp "$(ROBOCODE_HOME)/libs/robocode.jar" -d $(BIN_DIR) $(SRC_DIR)/*.java
 	@echo "Build complete. Classes are in $(BIN_DIR)"
 
-# Installs Robocode (if needed) and the compiled robot.
-install: build
+# Packages the compiled classes into a JAR file.
+package: build
+	@echo "--- Packaging robot into JAR file: $(ROBOT_JAR) ---"
+	@jar -cvf $(ROBOT_JAR) -C $(BIN_DIR) .
+
+# Installs Robocode (if needed) and the robot JAR.
+install: package
 	@echo "--- Running installation script (if necessary) ---"
 	@./install.sh
-	@echo "--- Cleaning and copying robot to $(ROBOCODE_HOME)/robots/mega/ ---"
-	@rm -rf "$(ROBOCODE_HOME)/robots/mega"
-	@mkdir -p "$(ROBOCODE_HOME)/robots/mega"
-	@(cd $(BIN_DIR) && cp -r mega/* "$(ROBOCODE_HOME)/robots/mega/")
-	@echo "Robot $(MAIN_ROBOT) installed to $(ROBOCODE_HOME)/robots/mega/"
+	@echo "--- Installing robot JAR to $(ROBOCODE_HOME)/robots/ ---"
+	@cp $(ROBOT_JAR) "$(ROBOCODE_HOME)/robots/"
+	@echo "Robot $(ROBOT_JAR) installed."
 
 # Creates a .battle file and runs it with the Robocode GUI.
 battle: install
@@ -64,16 +70,16 @@ battle: install
 	@echo "robocode.battle.rules.inactivityTime=450" >> $(BATTLE_FILE)
 	@ROBOT_LIST=""; \
 	for i in $$(seq 1 $(NUM_BENCHMARK_ROBOTS)); do \
-		ROBOT_LIST="$${ROBOT_LIST}$(MAIN_ROBOT)*,"; \
+		ROBOT_LIST="$${ROBOT_LIST}$(ROBOT_CLASS),"; \
 	done; \
 	echo "robocode.battle.selectedRobots=$${ROBOT_LIST}" >> $(BATTLE_FILE)
-	@echo "Generated $(BATTLE_FILE) with $(NUM_BENCHMARK_ROBOTS) instances of $(MAIN_ROBOT)."
+	@echo "Generated $(BATTLE_FILE) with $(NUM_BENCHMARK_ROBOTS) instances of $(ROBOT_CLASS)."
 
 	@echo "--- Starting Robocode battle with GUI ---"
 	@java -Xmx512M \
 		-Dsun.java2d.noddraw=true \
 		--add-opens java.base/sun.net.www.protocol.jar=ALL-UNNAMED \
-		-cp "$(ROBOCODE_HOME)/libs/robocode.jar:$(ROBOCODE_HOME)/robots" \
+		-cp "$(ROBOCODE_HOME)/libs/robocode.jar" \
 		robocode.Robocode \
 		-battle "$(CURDIR)/$(BATTLE_FILE)" \
 		-results "$(CURDIR)/$(RESULTS_FILE)" \
@@ -83,7 +89,7 @@ battle: install
 # Cleans up compiled files and generated battle files/logs.
 clean:
 	@echo "--- Cleaning up project ---"
-	@rm -rf $(BIN_DIR) $(BATTLE_FILE) $(RESULTS_FILE) robocode-debug.log battle.log
+	@rm -rf $(BIN_DIR) $(BATTLE_FILE) $(RESULTS_FILE) robocode-debug.log battle.log $(ROBOT_JAR)
 	@rm -rf robocode_local # Remove locally downloaded Robocode
 	@echo "Clean up complete."
 
@@ -92,9 +98,10 @@ help:
 	@echo ""
 	@echo "Usage:"
 	@echo "  make build         - Compiles the Java source files."
-	@echo "  make install       - Installs Robocode and the robot using install.sh."
+	@echo "  make package       - Packages the compiled classes into a JAR file."
+	@echo "  make install       - Installs Robocode and the robot JAR."
 	@echo "  make battle        - Installs and builds the robot, then runs a benchmark battle with the GUI."
-	@echo "  make clean         - Removes compiled classes and generated battle files/logs."
+	@echo "  make clean         - Removes compiled classes and generated files."
 	@echo ""
 	@echo "Setup:"
 	@echo "  The 'make install' target will automatically download and install Robocode if not found."
