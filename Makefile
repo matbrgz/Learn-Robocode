@@ -50,7 +50,7 @@ install: build
 	@echo "--- Cleaning and copying robot to $(ROBOCODE_HOME)/robots/mega/ ---"
 	@rm -rf "$(ROBOCODE_HOME)/robots/mega"
 	@mkdir -p "$(ROBOCODE_HOME)/robots/mega"
-	@cp -r $(BIN_DIR)/mega/* "$(ROBOCODE_HOME)/robots/mega/"
+	@(cd $(BIN_DIR) && cp -r mega/* "$(CURDIR)/$(ROBOCODE_HOME)/robots/mega/")
 	@echo "Robot $(MAIN_ROBOT) installed to $(ROBOCODE_HOME)/robots/mega/"
 
 # Creates a .battle file and runs it with the Robocode GUI.
