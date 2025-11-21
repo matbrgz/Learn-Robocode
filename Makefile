@@ -72,7 +72,11 @@ battle: install
 	@echo "Generated $(BATTLE_FILE) with $(NUM_BENCHMARK_ROBOTS) instances of $(MAIN_ROBOT)."
 
 	@echo "--- Starting Robocode battle with GUI ---"
-	@java -Xmx512M -Dsun.java2d.noddraw=true --add-opens java.base/sun.net.www.protocol.jar=ALL-UNNAMED -cp "$(ROBOCODE_HOME)/libs/robocode.jar" robocode.Robocode \
+	@java -Xmx512M \
+		-Dsun.java2d.noddraw=true \
+		-DROBOTPATH="$(ROBOCODE_HOME)/robots" \
+		--add-opens java.base/sun.net.www.protocol.jar=ALL-UNNAMED \
+		-cp "$(ROBOCODE_HOME)/libs/robocode.jar" robocode.Robocode \
 		-battle "$(CURDIR)/$(BATTLE_FILE)" \
 		-results "$(CURDIR)/$(RESULTS_FILE)" \
 		-tps 30 \
