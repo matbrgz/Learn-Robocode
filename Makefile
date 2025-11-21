@@ -76,7 +76,6 @@ battle: install
 		-battle $(BATTLE_FILE) \
 		-results $(RESULTS_XML) \
 		-nodisplay \
-		-hidden \
 		-nosound
 	@echo "Benchmark battle finished. Results saved to $(RESULTS_XML)."
 	@echo "You can view the raw XML results in $(RESULTS_XML)."
