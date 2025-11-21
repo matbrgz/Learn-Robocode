@@ -1,15 +1,10 @@
 # Makefile for Learn-Robocode Project
 
 # --- Configuration ---
-# Primary (GitHub) Robocode Version
-ROBOCODE_VERSION_GITHUB = 1.10.0
-ROBOCODE_SETUP_JAR = robocode-$(ROBOCODE_VERSION_GITHUB)-setup.jar
-ROBOCODE_URL_GITHUB = https://github.com/robo-code/robocode/releases/download/v$(ROBOCODE_VERSION_GITHUB)/$(ROBOCODE_SETUP_JAR)
-
-# Fallback (SourceForge) Robocode Version
-ROBOCODE_VERSION_SF = 1.9.3.6
-ROBOCODE_BINARY_ZIP_SF = robocode-$(ROBOCODE_VERSION_SF)-binary.zip
-ROBOCODE_URL_SF = https://downloads.sourceforge.net/project/robocode/robocode-stable/$(ROBOCODE_VERSION_SF)/$(ROBOCODE_BINARY_ZIP_SF)
+# Robocode Version
+ROBOCODE_VERSION = 1.10.0
+ROBOCODE_SETUP_JAR = robocode-$(ROBOCODE_VERSION)-setup.jar
+ROBOCODE_URL = https://github.com/robo-code/robocode/releases/download/v$(ROBOCODE_VERSION)/$(ROBOCODE_SETUP_JAR)
 
 # Local directory for Robocode installation if not provided by user
 ROBOCODE_LOCAL_INSTALL_DIR = robocode_local
@@ -41,7 +36,7 @@ RESULTS_XML = benchmark_results.xml
 
 # --- Targets ---
 
-.PHONY: all build install battle clean help download_robocode download_sourceforge_fallback copy_robots
+.PHONY: all build install battle clean help download_robocode copy_robots
 
 all: build
 
@@ -60,50 +55,36 @@ build:
 # Installs the compiled robot classes and ensures Robocode is present.
 install: download_robocode copy_robots
 
-# Downloads and extracts Robocode, trying GitHub first, then SourceForge as a fallback.
+# Downloads and installs Robocode using the setup JAR in headless mode.
 download_robocode:
 	@if [ ! -d "$(ROBOCODE_HOME)/libs" ]; then \
-		echo "--- Robocode not found at $(ROBOCODE_HOME), attempting to download ---"; \
+		echo "--- Robocode not found at $(ROBOCODE_HOME), attempting to download and install ---"; \
 		mkdir -p "$(ROBOCODE_LOCAL_INSTALL_DIR)"; \
-		echo "Attempting to download Robocode $(ROBOCODE_VERSION_GITHUB) from GitHub..."; \
-		curl -L -o "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_SETUP_JAR)" "$(ROBOCODE_URL_GITHUB)"; \
-		if [ $$? -eq 0 ] && [ -f "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_SETUP_JAR)" ]; then \
-			echo "Extracting Robocode $(ROBOCODE_VERSION_GITHUB)..."; \
-			unzip -o "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_SETUP_JAR)" -d "$(ROBOCODE_LOCAL_INSTALL_DIR)"; \
+		if [ ! -f "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_SETUP_JAR)" ]; then \
+			echo "Downloading Robocode $(ROBOCODE_VERSION) setup... This may take a moment."; \
+			curl -L -o "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_SETUP_JAR)" "$(ROBOCODE_URL)"; \
 			if [ $$? -ne 0 ]; then \
-				echo "Extraction failed for GitHub download, will try SourceForge fallback."; \
-				rm -rf "$(ROBOCODE_LOCAL_INSTALL_DIR)/*"; \
-				$(MAKE) download_sourceforge_fallback; \
-			else \
-				echo "Robocode $(ROBOCODE_VERSION_GITHUB) installed from GitHub."; \
+				echo "Error: Download failed for Robocode from $(ROBOCODE_URL)."; \
+				exit 1; \
 			fi; \
 		else \
-			echo "Download from GitHub failed, will try SourceForge fallback."; \
-			rm -rf "$(ROBOCODE_LOCAL_INSTALL_DIR)/*"; \
-			$(MAKE) download_sourceforge_fallback; \
+			echo "Robocode setup JAR already present: $(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_SETUP_JAR)"; \
 		fi; \
+		echo "Generating auto-install.xml for headless installation..."; \
+		echo '<izpack:installation version="5.0">' > auto-install.xml; \
+		echo '    <installpath>$(CURDIR)/$(ROBOCODE_LOCAL_INSTALL_DIR)</installpath>' >> auto-install.xml; \
+		echo '    <pack name="Robocode" index="0" selected="true"/>' >> auto-install.xml; \
+		echo '</izpack:installation>' >> auto-install.xml; \
+		echo "Running Robocode installer headlessly..."; \
+		java -jar "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_SETUP_JAR)" auto-install.xml; \
+		rm auto-install.xml; \
 		if [ ! -f "$(ROBOCODE_HOME)/libs/robocode.jar" ]; then \
-			echo "Error: Robocode installation failed after all attempts."; \
+			echo "Error: robocode.jar not found after installation. The headless installation might have failed."; \
 			exit 1; \
 		fi; \
+		echo "Robocode $(ROBOCODE_VERSION) successfully installed locally to $(ROBOCODE_LOCAL_INSTALL_DIR)" \
 	else \
 		echo "--- Robocode already found at $(ROBOCODE_HOME) ---"; \
-	fi
-
-download_sourceforge_fallback:
-	@echo "--- Attempting to download Robocode $(ROBOCODE_VERSION_SF) from SourceForge ---"; \
-	curl -L -o "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_BINARY_ZIP_SF)" "$(ROBOCODE_URL_SF)"; \
-	if [ $$? -eq 0 ] && [ -f "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_BINARY_ZIP_SF)" ]; then \
-		echo "Extracting Robocode $(ROBOCODE_VERSION_SF)..."; \
-		unzip -o "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_BINARY_ZIP_SF)" -d "$(ROBOCODE_LOCAL_INSTALL_DIR)"; \
-		if [ $$? -ne 0 ]; then \
-			echo "Error: Failed to extract from SourceForge download."; \
-			exit 1; \
-		fi; \
-		echo "Robocode $(ROBOCODE_VERSION_SF) installed from SourceForge."; \
-	else \
-		echo "Error: Download from SourceForge also failed."; \
-		exit 1; \
 	fi
 
 # Copies the compiled robots into the Robocode installation's robots directory.
@@ -145,7 +126,7 @@ battle: install
 # Cleans up compiled files and generated battle files/logs.
 clean:
 	@echo "--- Cleaning up project ---"
-	@rm -rf $(BIN_DIR) $(BATTLE_FILE) $(RESULTS_XML) robocode-debug.log
+	@rm -rf $(BIN_DIR) $(BATTLE_FILE) $(RESULTS_XML) robocode-debug.log auto-install.xml
 	@rm -rf $(ROBOCODE_LOCAL_INSTALL_DIR) # Remove locally downloaded Robocode
 	@echo "Clean up complete."
 
@@ -166,9 +147,8 @@ help:
 	@echo "Configuration:"
 	@echo "  ROBOCODE_HOME: $(ROBOCODE_HOME) (Can be overridden by environment variable)"
 	@echo "                 If not set, Robocode will be downloaded to $(ROBOCODE_LOCAL_INSTALL_DIR)."
-	@echo "  ROBOCODE_VERSION_GITHUB: $(ROBOCODE_VERSION_GITHUB)"
-	@echo "  ROBOCODE_VERSION_SF: $(ROBOCODE_VERSION_SF)"
+	@echo "  ROBOCODE_VERSION: $(ROBOCODE_VERSION)"
 	@echo "  NUM_ROUNDS: $(NUM_ROUNDS)"
 	@echo "  NUM_BENCHMARK_ROBOTS: $(NUM_BENCHMARK_ROBOTS)"
 	@echo ""
-	@echo "Note: 'curl -L', 'unzip', and 'seq' commands are required for automatic Robocode download and battle generation."
+	@echo "Note: 'java', 'curl -L', and 'seq' commands are required for automatic Robocode download and battle generation."
