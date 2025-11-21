@@ -3,8 +3,8 @@
 # --- Configuration ---
 # Robocode Version
 ROBOCODE_VERSION = 1.9.3.6
-ROBOCODE_JAR_NAME = robocode.jar
-ROBOCODE_URL = https://downloads.sourceforge.net/project/robocode/robocode-stable/$(ROBOCODE_VERSION)/$(ROBOCODE_JAR_NAME)
+ROBOCODE_BINARY_ZIP = robocode-$(ROBOCODE_VERSION)-binary.zip
+ROBOCODE_URL = https://downloads.sourceforge.net/project/robocode/robocode-stable/$(ROBOCODE_VERSION)/$(ROBOCODE_BINARY_ZIP)
 
 # Local directory for Robocode installation if not provided by user
 ROBOCODE_LOCAL_INSTALL_DIR = robocode_local
@@ -55,28 +55,32 @@ build:
 # Installs the compiled robot classes and ensures Robocode is present.
 install: download_robocode copy_robots
 
-# Downloads and sets up Robocode if it's not already present at $(ROBOCODE_HOME)
+# Downloads and extracts Robocode setup if not already present at $(ROBOCODE_HOME)
 download_robocode:
-	@if [ ! -d "$(ROBOCODE_HOME)/robots" ]; then \
-		echo "--- Robocode not found at $(ROBOCODE_HOME), attempting to download ---"; \
-		mkdir -p "$(ROBOCODE_LOCAL_INSTALL_DIR)/libs"; \
-		mkdir -p "$(ROBOCODE_LOCAL_INSTALL_DIR)/robots"; \
-		if [ ! -f "$(ROBOCODE_LOCAL_INSTALL_DIR)/libs/$(ROBOCODE_JAR_NAME)" ]; then \
-			echo "Downloading Robocode $(ROBOCODE_VERSION) from GitHub Releases... This may take a moment."; \
-			curl -L -o "$(ROBOCODE_LOCAL_INSTALL_DIR)/libs/$(ROBOCODE_JAR_NAME)" "$(ROBOCODE_URL)"; \
+	@if [ ! -d "$(ROBOCODE_HOME)/libs" ]; then \
+		echo "--- Robocode not found at $(ROBOCODE_HOME), attempting to download and extract ---"; \
+		mkdir -p "$(ROBOCODE_LOCAL_INSTALL_DIR)"; \
+		if [ ! -f "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_BINARY_ZIP)" ]; then \
+			echo "Downloading Robocode $(ROBOCODE_VERSION) from SourceForge... This may take a moment."; \
+			curl -L -o "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_BINARY_ZIP)" "$(ROBOCODE_URL)"; \
 			if [ $$? -ne 0 ]; then \
 				echo "Error: Download failed for Robocode from $(ROBOCODE_URL)."; \
 				exit 1; \
 			fi; \
-			echo "Robocode $(ROBOCODE_VERSION) successfully downloaded to $(ROBOCODE_LOCAL_INSTALL_DIR)/libs/"; \
 		else \
-			echo "Robocode JAR already present: $(ROBOCODE_LOCAL_INSTALL_DIR)/libs/$(ROBOCODE_JAR_NAME)"; \
+			echo "Robocode binary zip already present: $(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_BINARY_ZIP)"; \
 		fi; \
-		if [ ! -f "$(ROBOCODE_HOME)/libs/$(ROBOCODE_JAR_NAME)" ]; then \
-			echo "Error: robocode.jar not found after download. Robocode setup might be incomplete."; \
+		echo "Extracting Robocode to $(ROBOCODE_LOCAL_INSTALL_DIR)..."; \
+		unzip -o "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_BINARY_ZIP)" -d "$(ROBOCODE_LOCAL_INSTALL_DIR)"; \
+		if [ $$? -ne 0 ]; then \
+			echo "Error: Failed to extract Robocode binary zip. It might be corrupted or not a valid zip file."; \
 			exit 1; \
 		fi; \
-		echo "Robocode setup complete in $(ROBOCODE_LOCAL_INSTALL_DIR)"; \
+		if [ ! -f "$(ROBOCODE_HOME)/libs/robocode.jar" ]; then \
+			echo "Error: robocode.jar not found in extracted directory. Robocode installation might be incomplete."; \
+			exit 1; \
+		fi; \
+		echo "Robocode $(ROBOCODE_VERSION) successfully installed locally to $(ROBOCODE_LOCAL_INSTALL_DIR)" \
 	else \
 		echo "--- Robocode already found at $(ROBOCODE_HOME) ---"; \
 	fi
@@ -107,7 +111,7 @@ battle: install
 	@echo "Generated $(BATTLE_FILE) with $(NUM_BENCHMARK_ROBOTS) instances of $(MAIN_ROBOT)."
 
 	@echo "--- Running benchmark battle (this may take a while) ---"
-	@java -Xmx512M -Dsun.java2d.nodraw=true -cp "$(ROBOCODE_HOME)/libs/robocode.jar" robocode.Robocode \
+	@java -Xmx512M -Dsun.java2d.noddraw=true -cp "$(ROBOCODE_HOME)/libs/robocode.jar" robocode.Robocode \
 		-battle $(BATTLE_FILE) \
 		-results $(RESULTS_XML) \
 		-nodisplay \
@@ -146,5 +150,3 @@ help:
 	@echo "  NUM_BENCHMARK_ROBOTS: $(NUM_BENCHMARK_ROBOTS)"
 	@echo ""
 	@echo "Note: 'curl -L', 'unzip', and 'seq' commands are required for automatic Robocode download and battle generation."
-
-
