@@ -1,10 +1,15 @@
 # Makefile for Learn-Robocode Project
 
 # --- Configuration ---
-# Robocode Version
-ROBOCODE_VERSION = 1.9.3.6
-ROBOCODE_BINARY_ZIP = robocode-$(ROBOCODE_VERSION)-binary.zip
-ROBOCODE_URL = https://downloads.sourceforge.net/project/robocode/robocode-stable/$(ROBOCODE_VERSION)/$(ROBOCODE_BINARY_ZIP)
+# Primary (GitHub) Robocode Version
+ROBOCODE_VERSION_GITHUB = 1.10.0
+ROBOCODE_SETUP_JAR = robocode-$(ROBOCODE_VERSION_GITHUB)-setup.jar
+ROBOCODE_URL_GITHUB = https://github.com/robo-code/robocode/releases/download/v$(ROBOCODE_VERSION_GITHUB)/$(ROBOCODE_SETUP_JAR)
+
+# Fallback (SourceForge) Robocode Version
+ROBOCODE_VERSION_SF = 1.9.3.6
+ROBOCODE_BINARY_ZIP_SF = robocode-$(ROBOCODE_VERSION_SF)-binary.zip
+ROBOCODE_URL_SF = https://downloads.sourceforge.net/project/robocode/robocode-stable/$(ROBOCODE_VERSION_SF)/$(ROBOCODE_BINARY_ZIP_SF)
 
 # Local directory for Robocode installation if not provided by user
 ROBOCODE_LOCAL_INSTALL_DIR = robocode_local
@@ -36,7 +41,7 @@ RESULTS_XML = benchmark_results.xml
 
 # --- Targets ---
 
-.PHONY: all build install battle clean help download_robocode copy_robots
+.PHONY: all build install battle clean help download_robocode download_sourceforge_fallback copy_robots
 
 all: build
 
@@ -55,34 +60,50 @@ build:
 # Installs the compiled robot classes and ensures Robocode is present.
 install: download_robocode copy_robots
 
-# Downloads and extracts Robocode setup if not already present at $(ROBOCODE_HOME)
+# Downloads and extracts Robocode, trying GitHub first, then SourceForge as a fallback.
 download_robocode:
 	@if [ ! -d "$(ROBOCODE_HOME)/libs" ]; then \
-		echo "--- Robocode not found at $(ROBOCODE_HOME), attempting to download and extract ---"; \
+		echo "--- Robocode not found at $(ROBOCODE_HOME), attempting to download ---"; \
 		mkdir -p "$(ROBOCODE_LOCAL_INSTALL_DIR)"; \
-		if [ ! -f "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_BINARY_ZIP)" ]; then \
-			echo "Downloading Robocode $(ROBOCODE_VERSION) from SourceForge... This may take a moment."; \
-			curl -L -o "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_BINARY_ZIP)" "$(ROBOCODE_URL)"; \
+		echo "Attempting to download Robocode $(ROBOCODE_VERSION_GITHUB) from GitHub..."; \
+		curl -L -o "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_SETUP_JAR)" "$(ROBOCODE_URL_GITHUB)"; \
+		if [ $$? -eq 0 ] && [ -f "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_SETUP_JAR)" ]; then \
+			echo "Extracting Robocode $(ROBOCODE_VERSION_GITHUB)..."; \
+			unzip -o "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_SETUP_JAR)" -d "$(ROBOCODE_LOCAL_INSTALL_DIR)"; \
 			if [ $$? -ne 0 ]; then \
-				echo "Error: Download failed for Robocode from $(ROBOCODE_URL)."; \
-				exit 1; \
+				echo "Extraction failed for GitHub download, will try SourceForge fallback."; \
+				rm -rf "$(ROBOCODE_LOCAL_INSTALL_DIR)/*"; \
+				$(MAKE) download_sourceforge_fallback; \
+			else \
+				echo "Robocode $(ROBOCODE_VERSION_GITHUB) installed from GitHub."; \
 			fi; \
 		else \
-			echo "Robocode binary zip already present: $(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_BINARY_ZIP)"; \
-		fi; \
-		echo "Extracting Robocode to $(ROBOCODE_LOCAL_INSTALL_DIR)..."; \
-		unzip -o "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_BINARY_ZIP)" -d "$(ROBOCODE_LOCAL_INSTALL_DIR)"; \
-		if [ $$? -ne 0 ]; then \
-			echo "Error: Failed to extract Robocode binary zip. It might be corrupted or not a valid zip file."; \
-			exit 1; \
+			echo "Download from GitHub failed, will try SourceForge fallback."; \
+			rm -rf "$(ROBOCODE_LOCAL_INSTALL_DIR)/*"; \
+			$(MAKE) download_sourceforge_fallback; \
 		fi; \
 		if [ ! -f "$(ROBOCODE_HOME)/libs/robocode.jar" ]; then \
-			echo "Error: robocode.jar not found in extracted directory. Robocode installation might be incomplete."; \
+			echo "Error: Robocode installation failed after all attempts."; \
 			exit 1; \
 		fi; \
-		echo "Robocode $(ROBOCODE_VERSION) successfully installed locally to $(ROBOCODE_LOCAL_INSTALL_DIR)" \
 	else \
 		echo "--- Robocode already found at $(ROBOCODE_HOME) ---"; \
+	fi
+
+download_sourceforge_fallback:
+	@echo "--- Attempting to download Robocode $(ROBOCODE_VERSION_SF) from SourceForge ---"; \
+	curl -L -o "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_BINARY_ZIP_SF)" "$(ROBOCODE_URL_SF)"; \
+	if [ $$? -eq 0 ] && [ -f "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_BINARY_ZIP_SF)" ]; then \
+		echo "Extracting Robocode $(ROBOCODE_VERSION_SF)..."; \
+		unzip -o "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_BINARY_ZIP_SF)" -d "$(ROBOCODE_LOCAL_INSTALL_DIR)"; \
+		if [ $$? -ne 0 ]; then \
+			echo "Error: Failed to extract from SourceForge download."; \
+			exit 1; \
+		fi; \
+		echo "Robocode $(ROBOCODE_VERSION_SF) installed from SourceForge."; \
+	else \
+		echo "Error: Download from SourceForge also failed."; \
+		exit 1; \
 	fi
 
 # Copies the compiled robots into the Robocode installation's robots directory.
@@ -145,7 +166,8 @@ help:
 	@echo "Configuration:"
 	@echo "  ROBOCODE_HOME: $(ROBOCODE_HOME) (Can be overridden by environment variable)"
 	@echo "                 If not set, Robocode will be downloaded to $(ROBOCODE_LOCAL_INSTALL_DIR)."
-	@echo "  ROBOCODE_VERSION: $(ROBOCODE_VERSION)"
+	@echo "  ROBOCODE_VERSION_GITHUB: $(ROBOCODE_VERSION_GITHUB)"
+	@echo "  ROBOCODE_VERSION_SF: $(ROBOCODE_VERSION_SF)"
 	@echo "  NUM_ROUNDS: $(NUM_ROUNDS)"
 	@echo "  NUM_BENCHMARK_ROBOTS: $(NUM_BENCHMARK_ROBOTS)"
 	@echo ""
