@@ -12,43 +12,62 @@ This project serves as a comprehensive boilerplate and educational resource for 
 
 ## Getting Started
 
-To get started with this project, you will need to have Robocode installed on your system.
-You can then use the provided `Makefile` to build, install, and benchmark your robots.
-
 ### Prerequisites
 
-*   **Java Development Kit (JDK):** Ensure you have a JDK installed (Java 8 or higher is typically required for Robocode).
-*   **Robocode:** Download and install Robocode from the official website (http://robocode.sourceforge.net/).
+*   **Java Development Kit (JDK):** Ensure you have a JDK installed (Java 8 or higher is typically required).
+*   **Robocode JAR:** You must manually download the Robocode JAR file.
+
+### Manual Robocode Setup
+
+Automated downloads of Robocode have proven unreliable. Please follow these manual setup steps:
+
+1.  **Download Robocode:** Download the Robocode setup JAR (e.g., `robocode-1.10.0-setup.jar`) from the official GitHub releases page:
+    *   **[Robocode Releases](https://github.com/robo-code/robocode/releases)**
+
+2.  **Extract `robocode.jar`:** The downloaded file is an installer. You need to extract the core `robocode.jar` from it.
+    *   **Option A (Run Installer):** Run the installer (`java -jar robocode-1.10.0-setup.jar`) and install Robocode to a temporary directory. Then, find the `libs/robocode.jar` file inside that installation.
+    *   **Option B (Extract as ZIP):** A `.jar` file can often be treated like a `.zip` file. You can try to extract the contents of `robocode-1.10.0-setup.jar` using an archive manager and look for the `libs/robocode.jar` file inside.
+
+3.  **Create Local Directory Structure:** In the root of this project, create the following directory structure:
+    ```
+    robocode_local/
+    └── libs/
+    ```
+
+4.  **Place `robocode.jar`:** Move the `robocode.jar` you extracted in step 2 into the `robocode_local/libs/` directory.
+
+The final project structure should look like this before you run `make`:
+```
+<project_root>/
+├── robocode_local/
+│   └── libs/
+│       └── robocode.jar
+├── src/
+└── Makefile
+```
+Once this setup is complete, you can proceed with using the `Makefile`.
 
 ### Building and Running with `Makefile`
 
-A `Makefile` is provided to streamline the development process.
+With `robocode.jar` in place, you can now use the `Makefile` to build and run the robot.
 
-1.  **Set `ROBOCODE_HOME` (Optional):** If you already have Robocode installed and prefer to use that installation, set the `ROBOCODE_HOME` environment variable to point to its root directory.
-    ```bash
-    export ROBOCODE_HOME=/path/to/your/robocode/installation
-    ```
-    (e.g., `/home/user/robocode` or `C:/Robocode`)
-    *If `ROBOCODE_HOME` is not set, the `make install` command will automatically download and set up Robocode in a local directory named `robocode_local` within the project root.*
-
-2.  **Build the Robot:** Compile the Java source files.
+1.  **Build the Robot:** Compile the Java source files.
     ```bash
     make build
     ```
 
-3.  **Install the Robot (and Robocode if needed):** This command will first check for a Robocode installation. If `ROBOCODE_HOME` is not set, it will download the specified Robocode version and extract it into `robocode_local`. Then, it copies the compiled robot classes into the Robocode installation's `robots` directory. You might need to refresh the Robocode GUI if it's open.
+2.  **Install the Robot:** This copies the compiled classes into the local Robocode installation's `robots` directory.
     ```bash
     make install
     ```
 
-4.  **Run a Benchmark Battle:** This command will build and install the robot, then generate a battle file and run a battle with multiple instances of your `mega.Boilerplate` robot. The results will be saved to `benchmark_results.xml`.
+3.  **Run a Benchmark Battle:** This will build and install the robot, then generate a battle file and run a battle with multiple instances of your `mega.Boilerplate` robot. The results will be saved to `benchmark_results.xml`.
     ```bash
     make battle
     ```
     *Note:* The `make battle` command runs Robocode in headless mode (`-nodisplay -hidden -nosound`) for faster benchmarking. You can inspect the `benchmark_results.xml` file for detailed results.
-    *   You might need to install the `seq` command (e.g., `sudo apt-get install coreutils` on Debian/Ubuntu, or ensure it's available on macOS/BSD).
 
-5.  **Clean Up:** Remove compiled classes and generated battle files/logs.
+4.  **Clean Up:** Remove compiled classes and generated battle files/logs.
     ```bash
     make clean
     ```
