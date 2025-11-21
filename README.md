@@ -15,73 +15,39 @@ This project serves as a comprehensive boilerplate and educational resource for 
 ### Prerequisites
 
 *   **Java Development Kit (JDK):** Ensure you have a JDK installed (Java 8 or higher is typically required).
-*   **Robocode JAR:** You must manually download the Robocode JAR file.
 
-### Manual Robocode Setup
+### Setup and Installation
 
-Automated downloads of Robocode have proven unreliable. Please follow these manual setup steps:
+This project uses a `Makefile` to simplify the build process. The installation of Robocode and running battles is a manual process.
 
-1.  **Download Robocode:** Download the Robocode setup JAR (e.g., `robocode-1.10.0-setup.jar`) from the official GitHub releases page:
-    *   **[Robocode Releases](https://github.com/robo-code/robocode/releases)**
-
-2.  **Extract `robocode.jar`:** The downloaded file is an installer. You need to extract the core `robocode.jar` from it.
-    *   **Option A (Run Installer):** Run the installer (`java -jar robocode-1.10.0-setup.jar`) and install Robocode to a temporary directory. Then, find the `libs/robocode.jar` file inside that installation.
-    *   **Option B (Extract as ZIP):** A `.jar` file can often be treated like a `.zip` file. You can try to extract the contents of `robocode-1.10.0-setup.jar` using an archive manager and look for the `libs/robocode.jar` file inside.
-
-3.  **Create Local Directory Structure:** In the root of this project, create the following directory structure:
-    ```
-    robocode_local/
-    └── libs/
-    ```
-
-4.  **Place `robocode.jar`:** Move the `robocode.jar` you extracted in step 2 into the `robocode_local/libs/` directory.
-
-The final project structure should look like this before you run `make`:
-```
-<project_root>/
-├── robocode_local/
-│   └── libs/
-│       └── robocode.jar
-├── src/
-└── Makefile
-```
-Once this setup is complete, you can proceed with using the `Makefile`.
-
-### Building and Running with `Makefile`
-
-With `robocode.jar` in place, you can now use the `Makefile` to build and run the robot.
-
-1.  **Build the Robot:** Compile the Java source files.
+**Step 1: Install Robocode Manually**
+*   Run the `install.sh` script to download and extract Robocode into a `robocode_local` directory.
     ```bash
-    make build
+    bash install.sh
     ```
 
-2.  **Install the Robot:** This copies the compiled classes into the local Robocode installation's `robots` directory.
+**Step 2: Build and Package Your Robot**
+*   Use the `make` command to compile your robot and package it into a JAR file.
+    ```bash
+    make package
+    ```
+
+**Step 3: Install Your Robot**
+*   This command copies your robot's JAR file into the Robocode `robots` directory.
     ```bash
     make install
     ```
 
-3.  **Create a Benchmark Battle File:** This command will package the robot and generate a battle file named `benchmark.battle`.
-    ```bash
-    make battle
-    ```
+### Running a Battle
 
-4.  **Run the Benchmark Manually:**
-    *   Open your Robocode application (run `robocode.sh` or `robocode.bat` from the installation directory).
-    *   Go to `Options -> Preferences -> Development Options` and add the full path to this project's `bin` directory to your development paths. Click OK.
-    *   Go to `Battle -> Open`.
-    *   Select the `benchmark.battle` file from this project's root directory.
-    *   Run the battle.
+After installing your robot, you must start and run battles from the Robocode GUI.
 
-5.  **Clean Up:** Remove compiled classes and generated files.
-    ```bash
-    make clean
-    ```
+1.  **Start Robocode:** Run the `robocode.sh` (on Linux/macOS) or `robocode.bat` (on Windows) script from inside the `robocode_local` directory.
+2.  **Create a New Battle:** In the Robocode application, go to `Battle -> New`.
+3.  **Add Your Robot:** Find `mega.Boilerplate 1.0` in the list of robots and add it to the battle. You can add multiple instances or other sample robots to fight against.
+4.  **Start Battle:** Click the "Start Battle" button.
 
 ## Preliminary Benchmark Results
 
-*(This section should be updated by running the benchmark battle manually and recording the results from the Robocode GUI.)*
+To get benchmark results, create a battle with 10 instances of `mega.Boilerplate 1.0` for 100 rounds, run it, and manually record the final scores here.
 
-To get benchmark results, run the battle as described above and fill in the results here.
-
-These results provide a baseline for evaluating further improvements to the robot's AI components.
