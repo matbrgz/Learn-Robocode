@@ -70,7 +70,7 @@ battle: install
 	@echo "robocode.battle.rules.inactivityTime=450" >> $(BATTLE_FILE)
 	@ROBOT_LIST=""; \
 	for i in $$(seq 1 $(NUM_BENCHMARK_ROBOTS)); do \
-		ROBOT_LIST="$${ROBOT_LIST}$(ROBOT_CLASS),"; \
+		ROBOT_LIST="$${ROBOT_LIST}$(ROBOT_CLASS) $(ROBOT_VERSION),"; \
 	done; \
 	echo "robocode.battle.selectedRobots=$${ROBOT_LIST}" >> $(BATTLE_FILE)
 	@echo "Generated $(BATTLE_FILE) with $(NUM_BENCHMARK_ROBOTS) instances of $(ROBOT_CLASS)."
