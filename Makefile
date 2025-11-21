@@ -43,9 +43,9 @@ build:
 	javac -cp "$(ROBOCODE_HOME)/libs/robocode.jar" -d $(BIN_DIR) $(SRC_DIR)/*.java
 	@echo "Build complete. Classes are in $(BIN_DIR)"
 
-# Installs Robocode and the robot.
-install:
-	@echo "--- Running installation script ---"
+# Installs Robocode (if needed) and the compiled robot.
+install: build
+	@echo "--- Running installation script (if necessary) ---"
 	@./install.sh
 	@echo "--- Copying robot to $(ROBOCODE_HOME)/robots/mega/ ---"
 	@if [ ! -d "$(ROBOCODE_HOME)/robots" ]; then \
@@ -72,7 +72,7 @@ battle: install
 	@echo "Generated $(BATTLE_FILE) with $(NUM_BENCHMARK_ROBOTS) instances of $(MAIN_ROBOT)."
 
 	@echo "--- Running benchmark battle (this may take a while) ---"
-	@java -Xmx512M -Dsun.java2d.noddraw=true -cp "$(ROBOCODE_HOME)/libs/robocode.jar" robocode.Robocode \
+	@java -Xmx512M -Dsun.java2d.nodraw=true -cp "$(ROBOCODE_HOME)/libs/robocode.jar" robocode.Robocode \
 		-battle $(BATTLE_FILE) \
 		-results $(RESULTS_XML) \
 		-nodisplay \
