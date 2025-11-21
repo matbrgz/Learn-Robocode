@@ -55,7 +55,8 @@ build:
 # Installs the compiled robot classes and ensures Robocode is present.
 install: download_robocode copy_robots
 
-# Downloads and installs Robocode using the setup JAR in headless mode.
+# Downloads and installs Robocode using the setup JAR.
+# Use 'make install HEADLESS=true' for automated headless installation.
 download_robocode:
 	@if [ ! -d "$(ROBOCODE_HOME)/libs" ]; then \
 		echo "--- Robocode not found at $(ROBOCODE_HOME), attempting to download and install ---"; \
@@ -70,16 +71,23 @@ download_robocode:
 		else \
 			echo "Robocode setup JAR already present: $(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_SETUP_JAR)"; \
 		fi; \
-		echo "Generating auto-install.xml for headless installation..."; \
-		echo '<izpack:installation version="5.0">' > auto-install.xml; \
-		echo '    <installpath>$(CURDIR)/$(ROBOCODE_LOCAL_INSTALL_DIR)</installpath>' >> auto-install.xml; \
-		echo '    <pack name="Robocode" index="0" selected="true"/>' >> auto-install.xml; \
-		echo '</izpack:installation>' >> auto-install.xml; \
-		echo "Running Robocode installer headlessly from within its directory..."; \
-		(cd $(ROBOCODE_LOCAL_INSTALL_DIR) && java -jar $(ROBOCODE_SETUP_JAR) ../auto-install.xml); \
-		rm auto-install.xml; \
+		ifeq ($(HEADLESS),true)
+			echo "--- Running Robocode installer in headless mode ---"; \
+			echo "Generating auto-install.xml for headless installation..."; \
+			echo '<izpack:installation version="5.0">' > auto-install.xml; \
+			echo '    <installpath>$(CURDIR)/$(ROBOCODE_LOCAL_INSTALL_DIR)</installpath>' >> auto-install.xml; \
+			echo '    <pack name="Robocode" index="0" selected="true"/>' >> auto-install.xml; \
+			echo '</izpack:installation>' >> auto-install.xml; \
+			(cd $(ROBOCODE_LOCAL_INSTALL_DIR) && java -jar $(ROBOCODE_SETUP_JAR) ../auto-install.xml); \
+			rm auto-install.xml; \
+		else
+			echo "--- Starting interactive Robocode installer ---"; \
+			echo "Please follow the GUI installer instructions."; \
+			echo "It is recommended to install to the default location: $(CURDIR)/$(ROBOCODE_LOCAL_INSTALL_DIR)"; \
+			java -jar "$(ROBOCODE_LOCAL_INSTALL_DIR)/$(ROBOCODE_SETUP_JAR)"; \
+		endif
 		if [ ! -f "$(ROBOCODE_HOME)/libs/robocode.jar" ]; then \
-			echo "Error: robocode.jar not found after installation. The headless installation might have failed."; \
+			echo "Error: robocode.jar not found after installation. The installation might have failed or was cancelled."; \
 			exit 1; \
 		fi; \
 		echo "Robocode $(ROBOCODE_VERSION) successfully installed locally to $(ROBOCODE_LOCAL_INSTALL_DIR)" \
@@ -133,11 +141,11 @@ help:
 	@echo "Makefile for Learn-Robocode Project"
 	@echo ""
 	@echo "Usage:"
-	@echo "  make build         - Compiles the Java source files."
-	@echo "  make install       - Ensures Robocode is available (downloads if necessary)"
-	@echo "                       and copies compiled robots to the Robocode installation."
-	@echo "  make battle        - Builds and installs the robot, then runs a benchmark battle."
-	@echo "  make clean         - Removes compiled classes and generated battle files/logs."
+	@echo "  make build               - Compiles the Java source files."
+	@echo "  make install             - Downloads and runs the interactive Robocode installer."
+	@echo "  make install HEADLESS=true - Runs the automated, headless Robocode installation."
+	@echo "  make battle              - Installs and builds the robot, then runs a benchmark battle."
+	@echo "  make clean               - Removes compiled classes and generated battle files/logs."
 	@echo ""
 	@echo "Setup:"
 	@echo "  The 'make install' target will automatically download and install Robocode if not found."
