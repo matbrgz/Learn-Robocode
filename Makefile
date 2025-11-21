@@ -34,7 +34,7 @@ RESULTS_FILE = benchmark_results.txt
 
 all: build
 
-# Builds the Robocode robot(s) by compiling Java source files.
+# Builds the Robocode robot(s) by compiling Java source files and copying resources.
 build:
 	@echo "--- Building Robocode robots ---"
 	@if [ ! -f "$(ROBOCODE_HOME)/libs/robocode.jar" ]; then \
@@ -44,7 +44,9 @@ build:
 	@rm -rf $(BIN_DIR)
 	@mkdir -p $(BIN_DIR)
 	javac -cp "$(ROBOCODE_HOME)/libs/robocode.jar" -d $(BIN_DIR) $(SRC_DIR)/*.java
-	@echo "Build complete. Classes are in $(BIN_DIR)"
+	@echo "Copying .properties files..."
+	@cp $(SRC_DIR)/*.properties $(BIN_DIR)/mega/
+	@echo "Build complete."
 
 # Packages the compiled classes into a JAR file.
 package: build
@@ -77,6 +79,8 @@ setup: install
 
 # Runs the benchmark battle using the generated battle file.
 run: setup
+	@echo "--- Clearing Robocode robot cache ---"
+	@rm -rf "$(ROBOCODE_HOME)/robots/.data"
 	@echo "--- Starting Robocode battle with GUI ---"
 	@java -Xmx512M \
 		-Dsun.java2d.noddraw=true \
