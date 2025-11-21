@@ -55,7 +55,7 @@ install: build
 	@cp -r $(BIN_DIR)/* "$(ROBOCODE_HOME)/robots/mega/"
 	@echo "Robot $(MAIN_ROBOT) installed to $(ROBOCODE_HOME)/robots/mega/"
 
-# Creates a .battle file for benchmarking and runs it.
+# Creates a .battle file and runs it with the Robocode GUI.
 battle: install
 	@echo "--- Generating benchmark battle file: $(BATTLE_FILE) ---"
 	@echo "#Robocode Battle file" > $(BATTLE_FILE)
@@ -71,16 +71,11 @@ battle: install
 	done
 	@echo "Generated $(BATTLE_FILE) with $(NUM_BENCHMARK_ROBOTS) instances of $(MAIN_ROBOT)."
 
-	@echo "--- Running benchmark battle (this may take a while) ---"
+	@echo "--- Starting Robocode battle with GUI ---"
 	@java -Xmx512M -Dsun.java2d.noddraw=true --add-opens java.base/sun.net.www.protocol.jar=ALL-UNNAMED -cp "$(ROBOCODE_HOME)/libs/robocode.jar" robocode.Robocode \
 		-battle "$(CURDIR)/$(BATTLE_FILE)" \
 		-results "$(CURDIR)/$(RESULTS_FILE)" \
-		-nodisplay \
-		-nosound > battle.log 2>&1
-	@sleep 2
-	@echo "Benchmark battle finished. Results saved to $(RESULTS_FILE)."
-	@echo "Battle log saved to battle.log"
-	@echo "You can view the results in $(RESULTS_FILE)."
+		-nosound
 
 # Cleans up compiled files and generated battle files/logs.
 clean:
@@ -95,7 +90,7 @@ help:
 	@echo "Usage:"
 	@echo "  make build         - Compiles the Java source files."
 	@echo "  make install       - Installs Robocode and the robot using install.sh."
-	@echo "  make battle        - Installs and builds the robot, then runs a benchmark battle."
+	@echo "  make battle        - Installs and builds the robot, then runs a benchmark battle with the GUI."
 	@echo "  make clean         - Removes compiled classes and generated battle files/logs."
 	@echo ""
 	@echo "Setup:"
