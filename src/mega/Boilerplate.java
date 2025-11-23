@@ -50,20 +50,35 @@ public class Boilerplate extends RateControlRobot {
      */
     public static enum Strategy {
         // 1v1 Strategies
-        GUESS_FACTOR_GUN,
-        WAVE_SURFING,
-        MINIMUM_RISK,
+        GUN_GUESS_FACTOR,
+        MOVEMENT_WAVE_SURFING,
+        MOVEMENT_MINIMUM_RISK,
 
         // Melee Strategies
-        ANTI_GRAVITY,
-        DYNAMIC_CLUSTERING,
+        MOVEMENT_ANTI_GRAVITY,
+        RADAR_DYNAMIC_CLUSTERING,
+        
+        // Predictive Strategies
+        GUN_PREDICTIVE,
+        MOVEMENT_PREDICTIVE,
+        RADAR_PRIORITY,
         
         // General / Simple Strategies
-        HEAD_ON,
-        WALLS,
-        SPIN,
-        RANDOM,
-        SIMPLE,
+        RADAR_HEAD_ON,
+        GUN_HEAD_ON,
+        MOVEMENT_WALLS,
+        MOVEMENT_SPIN,
+        GUN_RANDOM,
+        RADAR_RANDOM,
+        GUN_SIMPLE,
+        RADAR_TRACKING,
+        MOVEMENT_SIMPLE,
+
+        // Composite Strategies
+        SURFER,
+        MELEE_BOT,
+        PREDICTIVE_BOT,
+        
         NONE // For robots that might not have a component
     }
 
@@ -81,7 +96,9 @@ public class Boilerplate extends RateControlRobot {
         this.state = new State(this);
         this.initStrategies(this.state);
         // Default to a simple strategy, but subclasses should override this.
-        this.updateStrategy(Strategy.SIMPLE); 
+        updateStrategy(Strategy.RADAR_TRACKING);
+        updateStrategy(Strategy.GUN_SIMPLE);
+        updateStrategy(Strategy.MOVEMENT_SIMPLE);
     }
 
     /**
@@ -91,20 +108,28 @@ public class Boilerplate extends RateControlRobot {
     private void initStrategies(final State state) {
         this.strategyMap = new HashMap<Strategy, StrategyComponents>() {{
             // 1v1 Strategies
-            put(Strategy.GUESS_FACTOR_GUN, new StrategyComponents(new RadarHeadOn(state), new GunGuessFactor(state), null));
-            put(Strategy.WAVE_SURFING, new StrategyComponents(null, null, new MovementWaveSurfing(state)));
-            put(Strategy.MINIMUM_RISK, new StrategyComponents(null, null, new MovementMinimumRisk(state)));
+            put(Strategy.GUN_GUESS_FACTOR, new StrategyComponents(null, new GunGuessFactor(state), null));
+            put(Strategy.MOVEMENT_WAVE_SURFING, new StrategyComponents(null, null, new MovementWaveSurfing(state)));
             
             // Melee Strategies
-            put(Strategy.ANTI_GRAVITY, new StrategyComponents(null, null, new MovementAntiGravity(state)));
-            put(Strategy.DYNAMIC_CLUSTERING, new StrategyComponents(new RadarDynamicClustering(state), null, null));
+            put(Strategy.MOVEMENT_ANTI_GRAVITY, new StrategyComponents(null, null, new MovementAntiGravity(state)));
+            put(Strategy.RADAR_DYNAMIC_CLUSTERING, new StrategyComponents(new RadarDynamicClustering(state), null, null));
 
+            // Predictive Strategies
+            put(Strategy.GUN_PREDICTIVE, new StrategyComponents(null, new GunPredictive(state, 1.0), null));
+            put(Strategy.MOVEMENT_PREDICTIVE, new StrategyComponents(null, null, new MovementPredictive(state)));
+            put(Strategy.RADAR_PRIORITY, new StrategyComponents(new RadarPriority(state), null, null));
+            
             // General / Simple Strategies
-            put(Strategy.HEAD_ON, new StrategyComponents(new RadarHeadOn(state), new GunHeadOn(state), null));
-            put(Strategy.WALLS, new StrategyComponents(null, null, new MovementWalls(state)));
-            put(Strategy.SPIN, new StrategyComponents(null, null, new MovementSpin(state)));
-            put(Strategy.RANDOM, new StrategyComponents(new RadarRandom(state), new GunRandom(state), null));
-            put(Strategy.SIMPLE, new StrategyComponents(new RadarTracking(state, 1.0), new GunSimple(state, 2.0), new MovementSimple(state, 2.0)));
+            put(Strategy.RADAR_HEAD_ON, new StrategyComponents(new RadarHeadOn(state), null, null));
+            put(Strategy.GUN_HEAD_ON, new StrategyComponents(null, new GunHeadOn(state), null));
+            put(Strategy.MOVEMENT_WALLS, new StrategyComponents(null, null, new MovementWalls(state)));
+            put(Strategy.MOVEMENT_SPIN, new StrategyComponents(null, null, new MovementSpin(state)));
+            put(Strategy.GUN_RANDOM, new StrategyComponents(null, new GunRandom(state), null));
+            put(Strategy.RADAR_RANDOM, new StrategyComponents(new RadarRandom(state), null, null));
+            put(Strategy.GUN_SIMPLE, new StrategyComponents(null, new GunSimple(state, 2.0), null));
+            put(Strategy.RADAR_TRACKING, new StrategyComponents(new RadarTracking(state, 1.0), null, null));
+            put(Strategy.MOVEMENT_SIMPLE, new StrategyComponents(null, null, new MovementSimple(state, 2.0)));
         }};
     }
 
