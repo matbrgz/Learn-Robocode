@@ -74,7 +74,7 @@ public class MovementWaveSurfing extends Movement {
 
 		// Example: A very basic "dodge" by randomly changing direction if an enemy is found.
 		// This is NOT wave surfing, but provides some placeholder movement.
-		OtherRobot target = this.state.targetEnemy;
+		OtherRobot target = this.state.trackingRobot;
 		if (target != null && this.state.owner.getEnergy() > 0) { // Only dodge if target exists and we have energy
 			// Randomly move either left or right relative to current heading
 			double randTurn = (Math.random() - 0.5) * Math.PI; // -PI/2 to PI/2

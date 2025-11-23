@@ -8,17 +8,24 @@ import java.util.Map;
 import java.util.Random;
 
 import robocode.*;
+
 /**
+ * The main Robocode robot class, extending {@link RateControlRobot}.
+ * This robot is designed to be a flexible boilerplate, allowing for easy
+ * integration and switching between different combat strategies.
+ * It manages various {@link Radar}, {@link Gun}, and {@link Movement}
+ * components to adapt its behavior based on battle conditions.
+ * 
+ * This class itself is not meant to be run directly in a battle, but rather
+ * extended by specific robot implementations that select a strategy.
  * 
  * @author Gates
- *
  */
 public class Boilerplate extends RateControlRobot {
 
 	/**
-	 * 
-	 * @author Gates
-	 *
+	 * An inner class that encapsulates a complete combat strategy by
+	 * combining a specific {@link Radar}, {@link Gun}, and {@link Movement} component.
 	 */
     private class StrategyComponents {
         public Radar radar;
@@ -26,10 +33,10 @@ public class Boilerplate extends RateControlRobot {
         public Movement movement;
 
         /**
-         * 
-         * @param radar
-         * @param gun
-         * @param movement
+         * Constructs a new StrategyComponents bundle.
+         * @param radar The radar component for this strategy.
+         * @param gun The gun component for this strategy.
+         * @param movement The movement component for this strategy.
          */
         public StrategyComponents(Radar radar, Gun gun, Movement movement) {
             this.radar = radar;
@@ -39,314 +46,182 @@ public class Boilerplate extends RateControlRobot {
     }
 
     /**
-     * 
-     * @author Gates
-     *
+     * An enumeration defining the different combat strategies available.
      */
     public static enum Strategy {
-        MELEE, SIMPLE, SPIN, RANDOM, ONEVSONE
+        // 1v1 Strategies
+        GUESS_FACTOR_GUN,
+        WAVE_SURFING,
+        MINIMUM_RISK,
+
+        // Melee Strategies
+        ANTI_GRAVITY,
+        DYNAMIC_CLUSTERING,
+        
+        // General / Simple Strategies
+        HEAD_ON,
+        WALLS,
+        SPIN,
+        RANDOM,
+        SIMPLE,
+        NONE // For robots that might not have a component
     }
 
-    private Map<Strategy, Boilerplate.StrategyComponents> strategyMap;
+    private Map<Strategy, StrategyComponents> strategyMap;
+    protected State state;
 
-    private State state;
-    // TODO: set these at some point
     private Radar radar;
     private Gun gun;
     private Movement movement;
 
     /**
-     * 
+     * Initializes a new instance of the Boilerplate robot.
      */
     public Boilerplate() {
         this.state = new State(this);
         this.initStrategies(this.state);
-        this.updateStrategy(Strategy.MELEE);
+        // Default to a simple strategy, but subclasses should override this.
+        this.updateStrategy(Strategy.SIMPLE); 
     }
 
     /**
-     * 
-     * @param state
+     * Initializes the map of available combat strategies.
+     * @param state The shared {@link State} object to be passed to each component.
      */
     private void initStrategies(final State state) {
-        this.strategyMap = new HashMap<Strategy, Boilerplate.StrategyComponents>() {{
-
-            put(Strategy.MELEE, new Boilerplate.StrategyComponents(
-                    new RadarPriority(state),
-                    new GunPredictive(state, 1.0),
-                    new MovementPredictive(state)
-            ));
+        this.strategyMap = new HashMap<Strategy, StrategyComponents>() {{
+            // 1v1 Strategies
+            put(Strategy.GUESS_FACTOR_GUN, new StrategyComponents(new RadarHeadOn(state), new GunGuessFactor(state), null));
+            put(Strategy.WAVE_SURFING, new StrategyComponents(null, null, new MovementWaveSurfing(state)));
+            put(Strategy.MINIMUM_RISK, new StrategyComponents(null, null, new MovementMinimumRisk(state)));
             
-            put(Strategy.SIMPLE, new Boilerplate.StrategyComponents(
-                    new RadarTracking(state, 1.0),
-                    new GunSimple(state, 2.0),
-                    new MovementSimple(state, 2.0)
-            ));
-            
-            put(Strategy.RANDOM, new Boilerplate.StrategyComponents(
-                    new RadarRandom(state),
-                    new GunRandom(state),
-                    null
-            ));
+            // Melee Strategies
+            put(Strategy.ANTI_GRAVITY, new StrategyComponents(null, null, new MovementAntiGravity(state)));
+            put(Strategy.DYNAMIC_CLUSTERING, new StrategyComponents(new RadarDynamicClustering(state), null, null));
 
-            put(Strategy.ONEVSONE, new Boilerplate.StrategyComponents(
-                    new RadarTracking(state, 2.0),
-                    new GunPredictive(state, 1.0),
-                    null
-            ));
-
+            // General / Simple Strategies
+            put(Strategy.HEAD_ON, new StrategyComponents(new RadarHeadOn(state), new GunHeadOn(state), null));
+            put(Strategy.WALLS, new StrategyComponents(null, null, new MovementWalls(state)));
+            put(Strategy.SPIN, new StrategyComponents(null, null, new MovementSpin(state)));
+            put(Strategy.RANDOM, new StrategyComponents(new RadarRandom(state), new GunRandom(state), null));
+            put(Strategy.SIMPLE, new StrategyComponents(new RadarTracking(state, 1.0), new GunSimple(state, 2.0), new MovementSimple(state, 2.0)));
         }};
     }
 
     /**
-     * 
-     * @param strategy
+     * Updates the currently active combat strategy of the robot.
+     * This method is protected so subclasses can call it to set their strategy.
+     * @param strategy The {@link Strategy} enum value representing the desired strategy.
      */
-    public void updateStrategy(Strategy strategy) {
-        Boilerplate.StrategyComponents components = this.strategyMap.get(strategy);
-
-        if (components.radar != null)
-            this.radar = components.radar;
-        if (components.gun != null)
-            this.gun = components.gun;
-        if (components.movement != null)
-            this.movement = components.movement;
-    }
-
-    /**
-     * 
-     */
-    public void getStrategy() {
-        if (getOthers() == 1) {
-        	 this.updateStrategy(Strategy.ONEVSONE);
-        } else if (getOthers() > 1 && getOthers() < 8) {
-        	this.updateStrategy(Strategy.MELEE);
-        } else if (getOthers() >= 8) {
-        	this.updateStrategy(Strategy.SIMPLE);
+    protected void updateStrategy(Strategy strategy) {
+        StrategyComponents components = this.strategyMap.get(strategy);
+        if (components == null) {
+            System.out.println("Warning: Strategy " + strategy + " not found in strategy map.");
+            return;
         }
+
+        if (components.radar != null) this.radar = components.radar;
+        if (components.gun != null) this.gun = components.gun;
+        if (components.movement != null) this.movement = components.movement;
     }
+    
     /**
-     * 
+     * The main run method for the robot.
      */
     @Override
     public void run() {
-        
-
-        // we want to control the radar manually
-        this.setAdjustRadarForRobotTurn(true);
-        this.setAdjustGunForRobotTurn(true);
-        this.setAdjustRadarForGunTurn(true);
+        setAdjustRadarForRobotTurn(true);
+        setAdjustGunForRobotTurn(true);
+        setAdjustRadarForGunTurn(true);
 
         this.state.battleWidth  = this.getBattleFieldWidth();
         this.state.battleHeight = this.getBattleFieldHeight();
         
-        int i = 0;
-        
         while (true) {
-        	i++;
-        	if (i % 7 == 0) {
-        		this.paintRobot();
-        	}
-        	
-        	
-        	this.getStrategy();
-        	
             this.state.advance();
 
-            this.radar.execute();
-            this.gun.execute();
-            this.movement.execute();
+            if (radar != null) radar.execute();
+            if (gun != null) gun.execute();
+            if (movement != null) movement.execute();
 
-            this.setRadarRotationRate(this.radar.getRotation());
-
-            this.setGunRotationRate(this.gun.getRotation());
-
-            this.setTurnRate(this.movement.getRotation());
-            this.setVelocityRate(this.movement.getSpeed());
-
-            if (this.gun.getShouldFire() && this.getGunHeat() == 0) {
-                Bullet bullet = this.setFireBullet(this.gun.getBulletPower());
-                BulletTracked tb = new BulletTracked(bullet);
-                this.gun.firedBullet(tb);
-                this.state.ourBullets.add(tb);
-                System.out.println("addbull");
+            if (radar != null) setRadarRotationRate(radar.getRotation());
+            if (gun != null) setGunRotationRate(gun.getRotation());
+            if (movement != null) {
+                setTurnRate(movement.getRotation());
+                setVelocityRate(movement.getSpeed());
             }
-            this.execute();
-        }
-    }
 
-    /**
-     * 
-     */
-    @Override
-    public void onBattleEnded(BattleEndedEvent e) {
-        System.out.println("The battle is over: " + e);
-    }
-
-    /**
-     * 
-     */
-    @Override
-    public void onBulletHit(BulletHitEvent e) {
-        System.out.println("Out bullet hit a robot: " + e);
-        this.state.bulletHitEvents.add(e);
-        
-        //for (TrackedBullet tb: this.state.ourBullets)
-        for (int i = this.state.ourBullets.size() - 1; i >= 0; i--)
-        {
-            BulletTracked tb = this.state.ourBullets.get(i);
-            if (tb.getBullet().hashCode() == e.getBullet().hashCode())
-            {
-                this.gun.bulletHit(tb);
-                this.state.ourBullets.remove(i);
-                return;
+            if (gun != null && gun.getShouldFire() && getGunHeat() == 0) {
+                Bullet bullet = setFireBullet(gun.getBulletPower());
+                if (bullet != null) {
+                    BulletTracked tb = new BulletTracked(bullet);
+                    gun.firedBullet(tb);
+                    this.state.ourBullets.add(tb);
+                }
             }
+            execute();
         }
     }
 
-    /**
-     * 
-     */
     @Override
-    public void onBulletHitBullet(BulletHitBulletEvent e) {
-        System.out.println("Our bullet hit another: " + e);
-        
-        //for (TrackedBullet tb: this.state.ourBullets)
-        for (int i = this.state.ourBullets.size() - 1; i >= 0; i--)
-        {
-            BulletTracked tb = this.state.ourBullets.get(i);
-            if (tb.getBullet().hashCode() == e.getBullet().hashCode())
-            {
-                this.state.ourBullets.remove(i);
-                return;
-            }
-        }
+    public void onScannedRobot(ScannedRobotEvent e) {
+        this.state.onScannedRobot(e);
     }
-
-    /**
-     * 
-     */
-    @Override
-    public void onBulletMissed(BulletMissedEvent e) {
-        System.out.println("Our bullet missed: " + e);
-        
-        for (int i = this.state.ourBullets.size() - 1; i >= 0; i--)
-        {
-            BulletTracked tb = this.state.ourBullets.get(i);
-            if (tb.getBullet().hashCode() == e.getBullet().hashCode())
-            {
-                this.gun.bulletMissed(tb);
-                this.state.ourBullets.remove(i);
-                return;
-            }
-        }
-    }
-
-    /**
-     * 
-     */
-    @Override
-    public void onDeath(DeathEvent e) {
-        System.out.println("We've died: " + e);
-    }
-
-    /**
-     * 
-     */
-    @Override
-    public void onHitByBullet(HitByBulletEvent e) {
-        System.out.println("We've been hit: " + e);
-    }
-
-    /**
-     * 
-     */
-    @Override
-    public void onHitRobot(HitRobotEvent e) {
-        this.radar.onHitRobot(e);
-        this.gun.onHitRobot(e);
-        this.movement.onHitRobot(e);
-
-        this.state.hitRobotEvents.add(e);
-    }
-
-    /**
-     * 
-     */
-    @Override
-    public void onHitWall(HitWallEvent e) {
-        System.out.println("We've crashed into a wall: " + e);
-    }
-
-    /**
-     * 
-     */
-    @Override
-    public void onPaint(Graphics2D g) {
-        super.onPaint(g);
-
-        this.radar.onPaint(g);
-        this.gun.onPaint(g);
-        this.movement.onPaint(g);
-
-        for(OtherRobot r : this.state.otherRobots.values()) {
-            r.onPaint(g, this.getTime());
-        }
-    }
-
-    /**
-     * 
-     */
+    
     @Override
     public void onRobotDeath(RobotDeathEvent e) {
         this.state.onRobotDeath(e);
     }
 
     @Override
-    public void onRoundEnded(RoundEndedEvent e) {
-        System.out.println("The round is over: " + e);
+    public void onHitWall(HitWallEvent e) {
+        if (movement != null) movement.onHitWall(e);
     }
 
-    /**
-     * 
-     */
     @Override
-    public void onScannedRobot(ScannedRobotEvent e) {
-        this.state.onScannedRobot(e);
+    public void onHitRobot(HitRobotEvent e) {
+        if (radar != null) radar.onHitRobot(e);
+        if (gun != null) gun.onHitRobot(e);
+        if (movement != null) movement.onHitRobot(e);
+        this.state.hitRobotEvents.add(e);
     }
 
-    /**
-     * 
-     */
     @Override
-    public void onWin(WinEvent e) {
-        System.out.println("We won! " + e);
-        
-        for (int i = 0; i < 50; i++) {
-			turnRight(100);
-			turnLeft(100);
-		}
+    public void onBulletHit(BulletHitEvent e) {
+        this.state.bulletHitEvents.add(e);
+        if (gun != null) {
+            for (int i = this.state.ourBullets.size() - 1; i >= 0; i--) {
+                BulletTracked tb = this.state.ourBullets.get(i);
+                if (tb.getBullet().hashCode() == e.getBullet().hashCode()) {
+                    gun.bulletHit(tb);
+                    this.state.ourBullets.remove(i);
+                    return;
+                }
+            }
+        }
     }
 
-    /**
-     * 
-     */
     @Override
-    public void onSkippedTurn(SkippedTurnEvent e) {
-        System.out.println("Oh no, we skipped a turn! " + e);
+    public void onBulletMissed(BulletMissedEvent e) {
+        if (gun != null) {
+            for (int i = this.state.ourBullets.size() - 1; i >= 0; i--) {
+                BulletTracked tb = this.state.ourBullets.get(i);
+                if (tb.getBullet().hashCode() == e.getBullet().hashCode()) {
+                    gun.bulletMissed(tb);
+                    this.state.ourBullets.remove(i);
+                    return;
+                }
+            }
+        }
     }
     
-    /**
-     * 
-     */
-    public void paintRobot() {
-    	float color1 = (float) Math.random();
-    	float color2 = (float) Math.random();
-    	float color3 = (float) Math.random();
-		setBodyColor(new Color(color1, color2, color3));
-        setGunColor(new Color(color1, color2, color3));
-        setRadarColor(new Color(color1, color2, color3));
-        setBulletColor(new Color(color1, color2, color3));
-        setScanColor(new Color(color1, color2, color3));
+    @Override
+    public void onPaint(Graphics2D g) {
+        if (radar != null) radar.onPaint(g);
+        if (gun != null) gun.onPaint(g);
+        if (movement != null) movement.onPaint(g);
+        for(OtherRobot r : this.state.otherRobots.values()) {
+            r.onPaint(g, getTime());
+        }
     }
 }

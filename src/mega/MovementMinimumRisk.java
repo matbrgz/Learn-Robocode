@@ -62,9 +62,9 @@ public class MovementMinimumRisk extends Movement {
 		this.rotation = 0; // No rotation by default.
 		
 		// A simple avoidance might be to turn away from the closest enemy.
-		OtherRobot target = this.state.targetEnemy;
-		if (target != null) {
-		    double angleToEnemy = Math.atan2(target.x - this.state.owner.getX(), target.y - this.state.owner.getY());
+		OtherRobot target = this.state.trackingRobot;
+		if (target != null && target.getHistory(-1) != null) {
+		    double angleToEnemy = Math.atan2(target.getHistory(-1).position.getX() - this.state.owner.getX(), target.getHistory(-1).position.getY() - this.state.owner.getY());
 		    // Try to turn perpendicular to the enemy bearing to strafe.
 		    this.rotation = Utils.normalRelativeAngle(angleToEnemy + Math.PI / 2 - this.state.owner.getHeadingRadians());
 		    this.speed = 5; // Move a little bit.

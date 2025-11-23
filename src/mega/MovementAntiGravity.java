@@ -71,8 +71,8 @@ public class MovementAntiGravity extends Movement {
 		// Add repulsive forces from enemies
 		for (Map.Entry<String, OtherRobot> entry : this.state.otherRobots.entrySet()) {
 			OtherRobot enemy = entry.getValue();
-			if (enemy.isAlive) {
-				Point2D.Double enemyPos = new Point2D.Double(enemy.x, enemy.y);
+			if (enemy.getHistory(-1) != null) {
+				Point2D.Double enemyPos = enemy.getHistory(-1).position;
 				double distance = myPos.distance(enemyPos);
 				
 				// Avoid division by zero or very small numbers
@@ -80,7 +80,7 @@ public class MovementAntiGravity extends Movement {
 
 				// Simple inverse square force model
 				double forceMagnitude = 50000.0 / (distance * distance); // Tune this constant
-				double angleToEnemy = Utils.atan2(enemyPos.x - myPos.x, enemyPos.y - myPos.y);
+				double angleToEnemy = Math.atan2(enemyPos.getX() - myPos.x, enemyPos.getY() - myPos.y);
 
 				// Repulsive force: move away from enemy
 				netForceX -= Math.sin(angleToEnemy) * forceMagnitude;
@@ -109,12 +109,12 @@ public class MovementAntiGravity extends Movement {
 
 
 		// Calculate desired heading and speed from net force
-		double desiredHeading = Utils.atan2(netForceX, netForceY);
+		double desiredHeading = Math.atan2(netForceX, netForceY);
 		this.rotation = Utils.normalRelativeAngle(desiredHeading - this.state.owner.getHeadingRadians());
 		
 		// Set speed based on force magnitude, capped at max speed
 		double totalForceMagnitude = Math.sqrt(netForceX * netForceX + netForceY * netForceY);
-		this.speed = Math.min(Robocode.MAX_VELOCITY, totalForceMagnitude * 0.1); // Tune factor
+		this.speed = Math.min(Rules.MAX_VELOCITY, totalForceMagnitude * 0.1); // Tune factor
 
 		// To make it move back and forth more, maybe alternate direction
 		if (Math.abs(this.rotation) > Math.PI / 2) { // If the turn is more than 90 degrees

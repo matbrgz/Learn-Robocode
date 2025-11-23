@@ -1,10 +1,14 @@
 package mega;
 
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Implements the Greedy Best-First Search (GBFS) algorithm.
@@ -12,6 +16,7 @@ import java.util.Set;
  * evaluation function (heuristic) that estimates the cost to reach the goal.
  * It always selects the node that appears "closest" to the goal, making it
  * greedy. Unlike A*, it does not consider the cost from the start node,
+
  * only the estimated cost to the goal.
  * 
  * In Robocode, GBFS could be used for pathfinding (e.g., finding a path
@@ -25,6 +30,7 @@ import java.util.Set;
 public class GreedyBestFirstSearch<T extends SearchNode> {
 
     private HeuristicFunction<T> heuristic;
+    private Map<T, T> cameFrom;
 
     /**
      * Constructs a new GreedyBestFirstSearch instance with a specified heuristic function.
@@ -32,6 +38,7 @@ public class GreedyBestFirstSearch<T extends SearchNode> {
      */
     public GreedyBestFirstSearch(HeuristicFunction<T> heuristic) {
         this.heuristic = heuristic;
+        this.cameFrom = new HashMap<>();
     }
 
     /**
@@ -49,12 +56,6 @@ public class GreedyBestFirstSearch<T extends SearchNode> {
         // Set to store already evaluated nodes
         Set<T> closedSet = new HashSet<>();
 
-        // Map to reconstruct the path
-        // For GBFS, we only need to store the predecessor for path reconstruction,
-        // as we don't track the g-score (cost from start).
-        // This is a simplified conceptual implementation. A real path reconstruction
-        // would typically be part of the SearchNode or a separate PathReconstructor.
-
         System.out.println("Conceptual: Performing Greedy Best-First Search from " + startNode + " to " + goalNode);
 
         while (!openSet.isEmpty()) {
@@ -64,21 +65,19 @@ public class GreedyBestFirstSearch<T extends SearchNode> {
 
             if (currentNode.equals(goalNode)) {
                 System.out.println("  Goal reached!");
-                // Path reconstruction (conceptual)
-                return reconstructPath(currentNode, startNode); // Needs a way to store predecessors
+                return reconstructPath(currentNode);
             }
 
             closedSet.add(currentNode);
 
-            for (T neighbor : currentNode.getNeighbors()) {
+            for (SearchNode neighborGeneric : currentNode.getNeighbors()) {
+                T neighbor = (T) neighborGeneric;
                 if (closedSet.contains(neighbor)) {
                     continue; // Skip already evaluated nodes
                 }
 
                 if (!openSet.contains(neighbor)) {
-                    // This is a new node, add it to the open set
-                    // In a full implementation, `neighbor` would need to store `currentNode` as its predecessor
-                    // to allow for path reconstruction.
+                    cameFrom.put(neighbor, currentNode);
                     openSet.add(neighbor);
                     System.out.println("    Adding neighbor to open set: " + neighbor + " (heuristic: " + heuristic.evaluate(neighbor) + ")");
                 }
@@ -90,24 +89,18 @@ public class GreedyBestFirstSearch<T extends SearchNode> {
     }
 
     /**
-     * (Conceptual) Reconstructs the path from the goal node back to the start node.
-     * This method assumes that each {@link SearchNode} can somehow store its predecessor
-     * in the path found by the search algorithm.
+     * Reconstructs the path from the goal node back to the start node.
      * @param endNode The goal node from which to start reconstruction.
-     * @param startNode The start node, to terminate reconstruction.
      * @return A {@link List} of {@link SearchNode}s representing the path.
      */
-    private List<T> reconstructPath(T endNode, T startNode) {
+    private List<T> reconstructPath(T endNode) {
         List<T> path = new ArrayList<>();
         T current = endNode;
-        while (current != null && !current.equals(startNode)) {
-            path.add(0, current); // Add to the beginning to get correct order
-            // current = current.getPredecessor(); // This method would be needed in SearchNode
-            break; // Placeholder, as predecessor isn't stored in this conceptual example
+        while (current != null) {
+            path.add(current);
+            current = cameFrom.get(current);
         }
-        if (current != null && current.equals(startNode)) {
-            path.add(0, startNode);
-        }
+        Collections.reverse(path);
         return path;
     }
 }

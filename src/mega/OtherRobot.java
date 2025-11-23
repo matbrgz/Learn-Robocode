@@ -308,6 +308,8 @@ public class OtherRobot implements Comparable<OtherRobot> {
             return false;
         }
 
+        double power = Util.roundTo1(previous.energy - current.energy);
+
         // Energy drop indicates a possible shot.
         // Rules.getGunHeat(firePower) is typically used for our own robot.
         // For enemy, we observe energy drop.
@@ -349,15 +351,18 @@ public class OtherRobot implements Comparable<OtherRobot> {
             }
         }
 
-        // 3. Ramming another robot (if they rammed us or another bot)
+        // remove any power that would've been lost if we rammed into them
         for (HitRobotEvent e : state.hitRobotEvents) {
             if (e.getName().equals(this.name)) {
-                predictedPower -= Rules.ROBOT_HIT_DAMAGE;
+                power -= Rules.ROBOT_HIT_DAMAGE;
             }
         }
 
-        // If the calculated power is too low, assume no shot.
-        if (predictedPower < Rules.MIN_BULLET_POWER) {
+        double confidence = 1.0; // Placeholder for confidence calculation
+
+        // check if power is still less than allowed
+        if (power < 0.1) {
+            // assume that robot didn't shoot
             return false;
         }
 
@@ -370,15 +375,9 @@ public class OtherRobot implements Comparable<OtherRobot> {
         // This angle needs to be carefully chosen for wave surfing.
         // In wave surfing, the wave is propagated from the enemy's position at fire time.
         // The angle range should cover the maximum possible escape angles.
-        double fireAngle = Util.getAngle(previous.position.getX(), previous.position.getY(),
-                                        state.owner.getX(), state.owner.getY()); // Angle from enemy to us.
-        
-        // Add a new WaveBullet. The angle range (fireAngle - 10, fireAngle + 10)
-        // is a placeholder for the actual "guess factor" range.
-        this.bulletWaves.add(new WaveBullet(previous.position, predictedPower,
-                                            fireAngle - 10, fireAngle + 10,
-                                            1.0, // Confidence level (1.0 for now)
-                                            state, current.time)); // Pass current.time as fireTime
+        double angle = Util.getAngle(previous.position.getX(), previous.position.getY(),
+                                        state.owner.getX(), state.owner.getY());
+        this.bulletWaves.add(new WaveBullet(previous.position, power, (int)(angle - 10), (int)(angle + 10), confidence, state, previous.time));
 
         return true;
     }

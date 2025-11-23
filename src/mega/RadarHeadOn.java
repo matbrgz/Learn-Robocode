@@ -33,12 +33,12 @@ public class RadarHeadOn extends Radar { // Corrected: extends Radar
 	 */
 	@Override
 	public void execute() {
-		OtherRobot target = this.state.targetEnemy;
+		OtherRobot target = this.state.trackingRobot;
 
-		if (target != null) {
+		if (target != null && target.getHistory(-1) != null) {
 			// Calculate the absolute bearing to the target enemy.
 			double absoluteBearing = Utils.normalAbsoluteAngle(
-				Math.atan2(target.x - this.state.owner.getX(), target.y - this.state.owner.getY())
+				Math.atan2(target.getHistory(-1).position.getX() - this.state.owner.getX(), target.getHistory(-1).position.getY() - this.state.owner.getY())
 			);
 			// Calculate the shortest turn needed to point the radar at the enemy.
 			// The rotation field expects radians.
