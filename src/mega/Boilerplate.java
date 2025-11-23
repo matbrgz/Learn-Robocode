@@ -70,6 +70,7 @@ public class Boilerplate extends RateControlRobot {
         MOVEMENT_SPIN,
         GUN_RANDOM,
         RADAR_RANDOM,
+        MOVEMENT_RANDOM,
         GUN_SIMPLE,
         RADAR_TRACKING,
         MOVEMENT_SIMPLE,
@@ -127,6 +128,7 @@ public class Boilerplate extends RateControlRobot {
             put(Strategy.MOVEMENT_SPIN, new StrategyComponents(null, null, new MovementSpin(state)));
             put(Strategy.GUN_RANDOM, new StrategyComponents(null, new GunRandom(state), null));
             put(Strategy.RADAR_RANDOM, new StrategyComponents(new RadarRandom(state), null, null));
+            put(Strategy.MOVEMENT_RANDOM, new StrategyComponents(null, null, new MovementRandom(state)));
             put(Strategy.GUN_SIMPLE, new StrategyComponents(null, new GunSimple(state, 2.0), null));
             put(Strategy.RADAR_TRACKING, new StrategyComponents(new RadarTracking(state, 1.0), null, null));
             put(Strategy.MOVEMENT_SIMPLE, new StrategyComponents(null, null, new MovementSimple(state, 2.0)));
