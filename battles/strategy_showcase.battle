@@ -1,7 +1,7 @@
 #Battle Properties
 robocode.battle.numRounds=10
-robocode.battleField.width=800
-robocode.battleField.height=600
+robocode.battleField.width=1200
+robocode.battleField.height=1200
 robocode.battle.gunCoolingRate=0.1
 robocode.battle.rules.inactivityTime=450
-robocode.battle.selectedRobots=mega.Boilerplate 1.0,sample.Walls,sample.SpinBot,sample.Crazy,sample.Tracker
+robocode.battle.selectedRobots=mega.Boilerplate 1.0,mega.WallsBot 1.0,mega.SpinBot 1.0,mega.AntiGravityBot 1.0,sample.Crazy,sample.Tracker,sample.Walls,sample.SpinBot
