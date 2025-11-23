@@ -59,6 +59,7 @@ run: setup
 	@echo "--- Starting Robocode battle with GUI ---"
 	@java -Xmx512M \
 		-Dsun.java2d.noddraw=true \
+		-DROBOTPATH="$(ROBOCODE_HOME)/robots:$(ROBOCODE_HOME)/libs/robocode.jar" \
 		--add-opens java.base/sun.net.www.protocol.jar=ALL-UNNAMED \
 		-cp "$(ROBOCODE_HOME)/libs/robocode.jar" \
 		robocode.Robocode \
