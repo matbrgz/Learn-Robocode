@@ -56,15 +56,8 @@ setup: install
 run: setup
 	@echo "--- Clearing Robocode robot cache ---"
 	@rm -rf "$(ROBOCODE_HOME)/robots/.data"
-	@echo "--- Starting Robocode battle with GUI ---"
-	@java -Xmx512M \
-		-Dsun.java2d.noddraw=true \
-		-DROBOTPATH="$(ROBOCODE_HOME)/robots:$(ROBOCODE_HOME)/libs/robocode.jar" \
-		--add-opens java.base/sun.net.www.protocol.jar=ALL-UNNAMED \
-		-cp "$(ROBOCODE_HOME)/libs/robocode.jar" \
-		robocode.Robocode \
-		-battle "$(CURDIR)/battles/strategy_showcase.battle" \
-		-tps 30
+	@echo "--- Starting Robocode battle from its home directory ---"
+	@(cd $(ROBOCODE_HOME) && java -Xmx512M -Dsun.java2d.noddraw=true --add-opens java.base/sun.net.www.protocol.jar=ALL-UNNAMED -cp libs/robocode.jar robocode.Robocode -battle "$(CURDIR)/battles/strategy_showcase.battle" -tps 30)
 
 # Alias for 'run'
 battle: run
