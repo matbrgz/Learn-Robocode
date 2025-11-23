@@ -10,7 +10,8 @@ public class WallsBot extends Boilerplate {
         // This robot will use Walls movement, a simple gun, and a simple radar.
         // We can combine strategies by calling updateStrategy multiple times,
         // as null components in a strategy won't override existing ones.
-        updateStrategy(Strategy.SIMPLE); // Load simple gun/radar
-        updateStrategy(Strategy.WALLS);  // Override movement with Walls
+        updateStrategy(Strategy.RADAR_TRACKING);
+        updateStrategy(Strategy.GUN_SIMPLE);
+        updateStrategy(Strategy.MOVEMENT_WALLS);
     }
 }

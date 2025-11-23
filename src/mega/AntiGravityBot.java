@@ -8,7 +8,8 @@ public class AntiGravityBot extends Boilerplate {
     public AntiGravityBot() {
         super();
         // This robot will use Anti-Gravity movement, a simple gun, and a simple radar.
-        updateStrategy(Strategy.SIMPLE);         // Load simple gun/radar
-        updateStrategy(Strategy.ANTI_GRAVITY);   // Override movement with Anti-Gravity
+        updateStrategy(Strategy.RADAR_DYNAMIC_CLUSTERING);
+        updateStrategy(Strategy.GUN_SIMPLE);
+        updateStrategy(Strategy.MOVEMENT_ANTI_GRAVITY);
     }
 }

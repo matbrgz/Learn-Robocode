@@ -8,7 +8,8 @@ public class SpinBot extends Boilerplate {
     public SpinBot() {
         super();
         // This robot will use Spin movement, a simple gun, and a simple radar.
-        updateStrategy(Strategy.SIMPLE); // Load simple gun/radar
-        updateStrategy(Strategy.SPIN);   // Override movement with Spin
+        updateStrategy(Strategy.RADAR_TRACKING);
+        updateStrategy(Strategy.GUN_SIMPLE);
+        updateStrategy(Strategy.MOVEMENT_SPIN);
     }
 }
