@@ -1,8 +1,8 @@
 #Battle Properties
-#A massive battle with all custom robots and a wide selection of sample bots.
+#A massive battle with all custom robots.
 robocode.battle.numRounds=10
-robocode.battleField.width=2000
-robocode.battleField.height=2000
+robocode.battleField.width=1600
+robocode.battleField.height=1600
 robocode.battle.gunCoolingRate=0.1
 robocode.battle.rules.inactivityTime=450
-robocode.battle.selectedRobots=mega.Boilerplate 1.0,mega.WallsBot 1.0,mega.SpinBot 1.0,mega.AntiGravityBot 1.0,mega.SurferBot 1.0,mega.MeleeBot 1.0,mega.PredictiveBot 1.0,sample.Crazy,sample.Tracker,sample.Walls,sample.SpinBot
+robocode.battle.selectedRobots=mega.Boilerplate 1.0,mega.WallsBot 1.0,mega.SpinBot 1.0,mega.AntiGravityBot 1.0,mega.SurferBot 1.0,mega.MeleeBot 1.0,mega.PredictiveBot 1.0,mega.RandomBot 1.0,mega.PredictiveSurfer 1.0
