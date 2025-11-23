@@ -72,9 +72,9 @@ public class RadarDynamicClustering extends Radar {
 
 		for (Map.Entry<String, OtherRobot> entry : this.state.otherRobots.entrySet()) {
 			OtherRobot enemy = entry.getValue();
-			if (enemy.isAlive) {
+			if (enemy.getHistory(-1) != null) {
 				Point2D.Double myPos = new Point2D.Double(this.state.owner.getX(), this.state.owner.getY());
-				Point2D.Double enemyPos = new Point2D.Double(enemy.x, enemy.y);
+				Point2D.Double enemyPos = enemy.getHistory(-1).position;
 				double distance = myPos.distance(enemyPos);
 
 				if (distance < minDistance) {
@@ -84,10 +84,10 @@ public class RadarDynamicClustering extends Radar {
 			}
 		}
 
-		if (nearestEnemy != null) {
+		if (nearestEnemy != null && nearestEnemy.getHistory(-1) != null) {
 			// Aim radar directly at the nearest enemy
 			double angleToEnemy = Utils.normalAbsoluteAngle(
-				Math.atan2(nearestEnemy.x - this.state.owner.getX(), nearestEnemy.y - this.state.owner.getY())
+				Math.atan2(nearestEnemy.getHistory(-1).position.getX() - this.state.owner.getX(), nearestEnemy.getHistory(-1).position.getY() - this.state.owner.getY())
 			);
 			this.rotation = Utils.normalRelativeAngle(angleToEnemy - this.state.owner.getRadarHeadingRadians());
 		} else {

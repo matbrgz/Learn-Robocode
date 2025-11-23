@@ -54,19 +54,13 @@ install: build
 
 # Generates the benchmark.battle file.
 setup: install
-	@echo "--- Generating benchmark battle file: $(BATTLE_FILE) ---"
+	@echo "--- Generating showcase battle file: $(BATTLE_FILE) ---"
 	@echo "#Robocode Battle file" > $(BATTLE_FILE)
-	@echo "robocode.battle.numRounds=$(NUM_ROUNDS)" >> $(BATTLE_FILE)
+	@echo "robocode.battle.numRounds=10" >> $(BATTLE_FILE)
 	@echo "robocode.battleField.width=800" >> $(BATTLE_FILE)
 	@echo "robocode.battleField.height=600" >> $(BATTLE_FILE)
-	@echo "robocode.battle.gunCoolingRate=0.1" >> $(BATTLE_FILE)
-	@echo "robocode.battle.rules.inactivityTime=450" >> $(BATTLE_FILE)
-	@ROBOT_LIST=""; \
-	for i in $$(seq 1 $(NUM_BENCHMARK_ROBOTS)); do \
-		ROBOT_LIST="$${ROBOT_LIST}mega.$(ROBOT_CLASS)*,"; \
-	done; \
-	echo "robocode.battle.selectedRobots=$${ROBOT_LIST}" >> $(BATTLE_FILE)
-	@echo "Generated $(BATTLE_FILE) with $(NUM_BENCHMARK_ROBOTS) instances of $(ROBOT_CLASS)."
+	@echo "robocode.battle.selectedRobots=mega.WallsBot*,mega.SpinBot*,mega.AntiGravityBot*,sample.Crazy,sample.Tracker" >> $(BATTLE_FILE)
+	@echo "Generated $(BATTLE_FILE) with a showcase of different robots."
 
 # Runs the benchmark battle using the generated battle file.
 run: setup

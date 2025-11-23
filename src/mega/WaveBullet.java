@@ -17,6 +17,7 @@ public class WaveBullet {
 	private ArrayList<BulletVirtual> bullets;
 	private double power;
 	private double confidence;
+	private long fireTime;
 
 	/**
 	 * 
@@ -26,10 +27,12 @@ public class WaveBullet {
 	 * @param endAngle
 	 * @param confidence
 	 * @param state
+	 * @param fireTime
 	 */
-	public WaveBullet(Vector position, double power, int startAngle, int endAngle, double confidence, State state) {
+	public WaveBullet(Vector position, double power, int startAngle, int endAngle, double confidence, State state, long fireTime) {
 		this.power = power;
 		this.confidence = confidence;
+		this.fireTime = fireTime;
 		this.bullets = new ArrayList<BulletVirtual>();
 		for(int i = startAngle; i < endAngle; i++) {
 			this.bullets.add(new BulletVirtual(position, this.power, Utils.normalAbsoluteAngleDegrees(i), state));
@@ -60,6 +63,14 @@ public class WaveBullet {
 	 */
 	public long getFlightTime() {
 		return bullets.get(0).getFlightTime();
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public long getFireTime() {
+		return this.fireTime;
 	}
 
 	/**

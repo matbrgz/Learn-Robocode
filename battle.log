@@ -1,0 +1,66 @@
+Loaded net.sf.robocode.api
+Loaded net.sf.robocode.core
+Loading plugins from /home/nakamoto/dev/Learn-Robocode/robocode_local/libs
+Loaded net.sf.robocode.ui
+Loaded net.sf.robocode.ui.editor
+Loaded net.sf.robocode.sound
+Loaded net.sf.robocode.battle
+Loaded net.sf.robocode.repository
+Loaded net.sf.robocode.host
+Initializing version check date.
+WARNING: A terminally deprecated method in java.lang.System has been called
+WARNING: System::setSecurityManager has been called by net.sf.robocode.host.security.RobocodeSecurityManager (file:/home/nakamoto/dev/Learn-Robocode/robocode_local/libs/robocode.host-1.10.0.jar)
+WARNING: Please consider reporting this to the maintainers of net.sf.robocode.host.security.RobocodeSecurityManager
+WARNING: System::setSecurityManager will be removed in a future release
+Reading robot database
+Preparing battle...
+----------------------
+Round 1 initializing..
+Let the games begin!
+
+Round 1 cleaning up.
+----------------------
+Round 2 initializing..
+Let the games begin!
+
+Round 2 cleaning up.
+----------------------
+Round 3 initializing..
+Let the games begin!
+
+Round 3 cleaning up.
+----------------------
+Round 4 initializing..
+Let the games begin!
+
+Round 4 cleaning up.
+----------------------
+Round 5 initializing..
+Let the games begin!
+
+Round 5 cleaning up.
+----------------------
+Round 6 initializing..
+Let the games begin!
+
+Round 6 cleaning up.
+----------------------
+Round 7 initializing..
+Let the games begin!
+
+Round 7 cleaning up.
+----------------------
+Round 8 initializing..
+Let the games begin!
+
+Round 8 cleaning up.
+----------------------
+Round 9 initializing..
+Let the games begin!
+
+Round 9 cleaning up.
+----------------------
+Round 10 initializing..
+Let the games begin!
+
+Round 10 cleaning up.

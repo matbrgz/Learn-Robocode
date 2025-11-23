@@ -37,7 +37,7 @@ public class GunHeadOn extends Gun {
 	 */
 	@Override
 	public void execute() {
-		OtherRobot target = this.state.targetEnemy;
+		OtherRobot target = this.state.trackingRobot;
 
 		if (target != null && target.getHistory(-1) != null) {
 			// Get the last known position of the target.

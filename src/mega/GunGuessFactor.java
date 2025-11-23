@@ -72,10 +72,10 @@ public class GunGuessFactor extends Gun {
 		this.rotation = 0; // No rotation for now, as no target is being acquired.
 
 		// Example: Simple targeting (to be replaced by actual GF)
-		OtherRobot target = this.state.targetEnemy;
-		if (target != null) {
+		OtherRobot target = this.state.trackingRobot;
+		if (target != null && target.getHistory(-1) != null) {
 			double absoluteBearing = robocode.util.Utils.normalAbsoluteAngle(
-				Math.atan2(target.x - this.state.owner.getX(), target.y - this.state.owner.getY())
+				Math.atan2(target.getHistory(-1).position.getX() - this.state.owner.getX(), target.getHistory(-1).position.getY() - this.state.owner.getY())
 			);
 			double gunTurnAmt = robocode.util.Utils.normalRelativeAngle(absoluteBearing - this.state.owner.getGunHeadingRadians());
 			this.rotation = gunTurnAmt; // Turn the gun to target enemy.
